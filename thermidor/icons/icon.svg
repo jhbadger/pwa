@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#2b3f8c"/>
+      <stop offset="100%" stop-color="#121830"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Phrygian (liberty) cap, the classic symbol of the French Revolution -->
+  <g>
+    <path d="M158 366
+             C144 292 150 218 182 168
+             C158 128 162 84 196 58
+             C224 36 258 34 280 50
+             C266 58 258 74 264 90
+             C296 96 336 118 356 156
+             C382 204 372 250 336 264
+             C356 270 372 288 378 312
+             C384 334 380 352 366 366
+             Z"
+          fill="#c23b3b"/>
+    <path d="M264 90 C296 96 336 118 356 156 C382 204 372 250 336 264
+             C316 250 304 222 306 192 C308 156 292 118 264 90 Z"
+          fill="#9c2f2f"/>
+    <path d="M158 366 C144 292 150 218 182 168 C169 143 165 116 173 92
+             C176 130 186 172 202 210 C216 244 220 292 214 336 C212 348 210 358 208 366 Z"
+          fill="#a52f2f" opacity="0.5"/>
+    <rect x="140" y="366" width="232" height="32" rx="16" fill="#f2ece0"/>
+    <circle cx="256" cy="382" r="19" fill="#2b3f8c"/>
+    <circle cx="256" cy="382" r="12" fill="#f2ece0"/>
+    <circle cx="256" cy="382" r="5.5" fill="#c23b3b"/>
+  </g>
+</svg>

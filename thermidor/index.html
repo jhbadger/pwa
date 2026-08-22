@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Thermidor</title>
+<meta name="description" content="French Republican Calendar and decimal clock converter.">
+<meta name="theme-color" content="#121830">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-512.png" sizes="512x512" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Thermidor">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="css/style.css">
+
+<script>
+  // Must run during head parse, before any layout, so standalone-only chrome
+  // never flashes on screen before disappearing.
+  (function () {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+    document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
+  })();
+</script>
+
+<script>
+  // Register as early as possible (during parse), not on window.load — waiting for
+  // every subresource means warming the cache last on the slow connection that needs it most.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <h1 class="title">Thermidor</h1>
+    <p class="subtitle">French Republican Calendar</p>
+  </header>
+
+  <main class="content">
+    <div class="datecard">
+      <p class="revdate" id="revDate">&nbsp;</p>
+      <p class="symbol" id="symbol">&nbsp;</p>
+    </div>
+
+    <div class="clockcard">
+      <p class="clocklabel">Decimal time</p>
+      <p class="clock" id="clock">0:00:00</p>
+    </div>
+
+    <div class="pickerrow">
+      <input type="date" id="datePicker" class="dateinput" min="1792-09-22" aria-label="Choose a Gregorian date">
+      <button type="button" class="btn" id="btnToday">Today</button>
+    </div>
+  </main>
+
+  <footer class="toolbar">
+    <button type="button" class="tbtn" id="btnSettings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.5.5 0 00.12-.61l-1.92-3.32a.5.5 0 00-.59-.22l-2.39.96a7.03 7.03 0 00-1.62-.94l-.36-2.54a.5.5 0 00-.5-.42h-3.84a.5.5 0 00-.5.42l-.36 2.54c-.6.24-1.15.55-1.66.94l-2.39-.96a.5.5 0 00-.59.22L2.74 8.87a.5.5 0 00.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.5.5 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.39 1.05.71 1.62.94l.36 2.54c.05.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54a7.03 7.03 0 001.62-.94l2.39.96c.23.09.48 0 .59-.22l1.92-3.32a.5.5 0 00-.12-.61l-2.01-1.58zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></svg>
+      <span>Settings</span>
+    </button>
+    <button type="button" class="tbtn" id="btnAbout" aria-label="About">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 7h2v2h-2V7zm0 4h2v6h-2v-6zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+      <span>About</span>
+    </button>
+  </footer>
+</div>
+
+<div class="sheet-backdrop" id="settingsBackdrop" hidden>
+  <div class="sheet" role="dialog" aria-label="Settings">
+    <h2 class="sheet-title">Month names</h2>
+    <div class="radiogroup" id="monthStyleGroup">
+      <label class="radio"><input type="radio" name="monthStyle" value="french" checked><span>French <em>(Vendémiaire, Brumaire…)</em></span></label>
+      <label class="radio"><input type="radio" name="monthStyle" value="carlyle"><span>Carlyle's English <em>(Vintagearious, Fogarious…)</em></span></label>
+      <label class="radio"><input type="radio" name="monthStyle" value="satire"><span>Satirical English <em>(Wheezy, Sneezy…)</em></span></label>
+    </div>
+    <button type="button" class="btn sheet-close" id="btnSettingsClose">Done</button>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="aboutBackdrop" hidden>
+  <div class="sheet" role="dialog" aria-label="About">
+    <h2 class="sheet-title">Thermidor</h2>
+    <p class="about-text">
+      The French Republican Calendar was used in France from 1793 to 1805. Each of the
+      twelve 30-day months is divided into three 10-day weeks (décades), with 5 or 6
+      extra "Sansculottides" days at year's end. Rather than saints' days, each day of
+      the year is named for a plant, animal, or tool of rural life. The decimal clock
+      divides the day into 10 hours of 100 decimal minutes of 100 decimal seconds.
+    </p>
+    <p class="about-text">
+      By Jonathan Badger. Ported from the original
+      <a href="https://github.com/jhbadger/Thermidor-Android" target="_blank" rel="noopener">Thermidor Android app</a>.
+    </p>
+    <p class="about-text about-license">
+      MIT License — Copyright (c) 221 (2013 Gregorian) Jonathan Badger. Permission is
+      hereby granted, free of charge, to use, copy, modify, merge, publish, distribute,
+      sublicense, and/or sell copies of this software, subject to including the
+      copyright notice in all copies. Provided "as is", without warranty of any kind.
+    </p>
+    <button type="button" class="btn sheet-close" id="btnAboutClose">Done</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
