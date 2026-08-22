@@ -45,13 +45,13 @@
 
   <!-- ---------- setup screen: choose an image and piece count ---------- -->
   <main class="setup" id="setupScreen">
-    <p class="setup-lead">Pick an image, or use one of your own.</p>
+    <p class="setup-lead">Pick an image, or use a photo or PDF of your own.</p>
 
     <div class="picker" id="picker" role="list"></div>
 
     <label class="filebtn" id="filebtnLabel">
-      <input type="file" id="photoInput" accept="image/*" hidden>
-      <span id="fileLabelText">Choose a photo&hellip;</span>
+      <input type="file" id="photoInput" accept="image/*,.pdf,application/pdf" hidden>
+      <span id="fileLabelText">Choose a photo or PDF&hellip;</span>
     </label>
 
     <div class="piececount">

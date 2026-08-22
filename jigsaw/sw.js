@@ -3,7 +3,7 @@
 // failure is not enough. VERSION is a hash of the precached files' contents; run
 // `node scripts/build.mjs` after editing any of them so the browser detects a real update.
 
-const VERSION = 'd198b76679a3';
+const VERSION = '160547560dac';
 const CACHE_NAME = `jigsaw-${VERSION}`;
 
 // Everything the app needs to launch, cold, with no network at all — including
@@ -17,6 +17,8 @@ const PRECACHE = [
   'js/app.js',
   'js/puzzle.js',
   'js/storage.js',
+  'js/vendor/pdfjs/pdf.min.mjs',
+  'js/vendor/pdfjs/pdf.worker.min.mjs',
   'images/sunset-peaks.jpg',
   'images/coral-reef.jpg',
   'images/aurora-night.jpg',

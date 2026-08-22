@@ -61,7 +61,7 @@ function markPickerSelected(el) {
 
 function clearFileSelection() {
   filebtnLabel.classList.remove('selected');
-  fileLabelText.textContent = 'Choose a photo…';
+  fileLabelText.textContent = 'Choose a photo or PDF…';
 }
 
 photoInput.addEventListener('change', () => {
@@ -81,18 +81,49 @@ pieceSlider.addEventListener('input', () => {
 btnStart.addEventListener('click', async () => {
   if (!selectedSource) return;
   btnStart.disabled = true;
+  showGameScreen();
+  statusEl.textContent = isPdfFile(selectedSource) ? 'Rendering PDF page…' : 'Preparing puzzle…';
+  await nextFrame();
   try {
-    const blob = selectedSource.kind === 'file'
-      ? selectedSource.file
-      : await fetch(selectedSource.file).then((r) => r.blob());
-    const img = await blobToImage(blob);
-    await startNewGame(img, blob, Number(pieceSlider.value));
+    const srcCanvas = await resolveSourceCanvas(selectedSource);
+    statusEl.textContent = 'Preparing puzzle…';
+    await nextFrame();
+    await startNewGame(srcCanvas, Number(pieceSlider.value));
+  } catch (err) {
+    console.error(err);
+    goToSetup(false);
+    showToast('Could not load that file.');
   } finally {
     btnStart.disabled = false;
   }
 });
 
-// ---------- image loading helpers ----------
+// ---------- image / PDF loading helpers ----------
+
+function isPdfFile(selectedSource) {
+  if (selectedSource.kind !== 'file') return false;
+  const file = selectedSource.file;
+  return file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+}
+
+// Resolves any selected source — a bundled image, an uploaded photo, or an
+// uploaded PDF — down to a single canvas holding the artwork at natural
+// resolution, so the rest of the pipeline never needs to know which kind it
+// started from.
+async function resolveSourceCanvas(selectedSource) {
+  if (isPdfFile(selectedSource)) {
+    return renderRandomPdfPage(selectedSource.file);
+  }
+  const blob = selectedSource.kind === 'file'
+    ? selectedSource.file
+    : await fetch(selectedSource.file).then((r) => r.blob());
+  const img = await blobToImage(blob);
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  canvas.getContext('2d').drawImage(img, 0, 0);
+  return canvas;
+}
 
 function blobToImage(blob) {
   return new Promise((resolve, reject) => {
@@ -102,6 +133,46 @@ function blobToImage(blob) {
     img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
     img.src = url;
   });
+}
+
+// pdf.js is only needed by the (optional) PDF path, so it's loaded on demand
+// rather than on every launch — see the offline-first rule against putting
+// anything on the critical path the installed app can't use. It's still in
+// sw.js's PRECACHE list, so the dynamic import resolves from cache even the
+// first time it's used offline.
+const PDF_TARGET_MAX_DIM = 1600;
+let pdfjsLibPromise = null;
+function loadPdfjs() {
+  if (!pdfjsLibPromise) {
+    pdfjsLibPromise = import('./vendor/pdfjs/pdf.min.mjs').then((mod) => {
+      mod.GlobalWorkerOptions.workerSrc = new URL('./vendor/pdfjs/pdf.worker.min.mjs', import.meta.url).href;
+      return mod;
+    });
+  }
+  return pdfjsLibPromise;
+}
+
+async function renderRandomPdfPage(blob) {
+  const pdfjsLib = await loadPdfjs();
+  const data = await blob.arrayBuffer();
+  const doc = await pdfjsLib.getDocument({ data }).promise;
+  const pageNum = 1 + Math.floor(Math.random() * doc.numPages);
+  const page = await doc.getPage(pageNum);
+
+  const vp1 = page.getViewport({ scale: 1 });
+  const scale = PDF_TARGET_MAX_DIM / Math.max(vp1.width, vp1.height);
+  const viewport = page.getViewport({ scale });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(viewport.width);
+  canvas.height = Math.round(viewport.height);
+  const ctx = canvas.getContext('2d');
+  // PDF pages have no inherent background — fill white first, or margins
+  // would sample as black once the jigsaw piece cutter reads raw RGB below.
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  return canvas;
 }
 
 function nextFrame() {
@@ -158,18 +229,17 @@ function showGameScreen() {
   winOverlay.hidden = true;
 }
 
-async function startNewGame(imgEl, blob, nTarget) {
-  showGameScreen();
-  statusEl.textContent = 'Preparing puzzle…';
-  await nextFrame();
-
-  const imgW = imgEl.naturalWidth;
-  const imgH = imgEl.naturalHeight;
-  const srcCanvas = document.createElement('canvas');
-  srcCanvas.width = imgW;
-  srcCanvas.height = imgH;
+// srcCanvas already holds the artwork at natural resolution — from a bundled
+// or uploaded photo, or a rendered PDF page (see resolveSourceCanvas). The
+// canvas is re-encoded to a JPEG blob for persistence rather than keeping
+// whatever the original file was: a resumed game must show the exact pixels
+// the player was assembling, and for a PDF that means the one page that got
+// randomly picked, not a re-render that might land on a different page.
+async function startNewGame(srcCanvas, nTarget) {
+  const imgW = srcCanvas.width;
+  const imgH = srcCanvas.height;
   const srcCtx = srcCanvas.getContext('2d');
-  srcCtx.drawImage(imgEl, 0, 0);
+  const imageBlob = await new Promise((resolve) => srcCanvas.toBlob(resolve, 'image/jpeg', 0.9));
 
   const { nCols, nRows, nPieces } = computeGrid(nTarget, imgW, imgH);
   const pieceW = Math.max(1, Math.floor(imgW / nCols));
@@ -187,7 +257,7 @@ async function startNewGame(imgEl, blob, nTarget) {
     edges, pieceCanvases,
     pieceX: s.pieceX, pieceY: s.pieceY, placed: s.placed, drawOrder: s.drawOrder,
     solvedCount: 0, won: false, showGhost: false,
-    nTarget, imageBlob: blob, srcCanvas, srcCtx,
+    nTarget, imageBlob, srcCanvas, srcCtx,
     dragging: false, dragPiece: -1, dragOffX: 0, dragOffY: 0,
   };
 
