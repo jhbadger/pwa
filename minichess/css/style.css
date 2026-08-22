@@ -1,0 +1,279 @@
+:root {
+  --bg: #241d1a;
+  --panel: #2b2320;
+  --ink: #f1e9de;
+  --ink-dim: #b8a99a;
+  --accent: #d7a24a;
+  --light-sq: #eddfc4;
+  --dark-sq: #a97654;
+  --sel: #7ec46c;
+  --move-dot: rgba(30, 20, 10, 0.55);
+  --capture-ring: #d9544d;
+  --check: #e2483f;
+  --last-from: rgba(215, 162, 74, 0.45);
+  --last-to: rgba(215, 162, 74, 0.65);
+  --safe-top: max(env(safe-area-inset-top), 12px);
+  --safe-bottom: max(env(safe-area-inset-bottom), 12px);
+  --safe-left: max(env(safe-area-inset-left), 10px);
+  --safe-right: max(env(safe-area-inset-right), 10px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.app {
+  height: 100dvh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  flex: 0 0 auto;
+  padding: var(--safe-top) var(--safe-right) 6px var(--safe-left);
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.status {
+  margin: 2px 0 0;
+  min-height: 1.2em;
+  font-size: 0.95rem;
+  color: var(--ink-dim);
+}
+
+.status.check { color: var(--check); font-weight: 600; }
+.status.over { color: var(--accent); font-weight: 700; }
+
+/* ---------- board ---------- */
+
+.board-slot {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+  padding: 4px var(--safe-left) 4px var(--safe-right);
+}
+
+.board-frame {
+  position: relative;
+  width: min(94cqw, 94cqh, 640px);
+  aspect-ratio: 1;
+}
+
+.board {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+.sq {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sq.light { background: var(--light-sq); }
+.sq.dark  { background: var(--dark-sq); }
+
+.sq.last-from::before,
+.sq.last-to::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.sq.last-from::before { background: var(--last-from); }
+.sq.last-to::before { background: var(--last-to); }
+
+.sq.selected::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(126, 196, 108, 0.55);
+}
+
+.sq.in-check::before {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(226, 72, 63, 0.75), rgba(226, 72, 63, 0));
+}
+
+.sq .dot {
+  position: absolute;
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background: var(--move-dot);
+  pointer-events: none;
+}
+
+.sq .ring {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  border: 4px solid var(--capture-ring);
+  pointer-events: none;
+}
+
+.piece {
+  position: relative;
+  font-size: min(9.5cqw, 9.5cqh);
+  line-height: 1;
+  cursor: grab;
+  touch-action: none;
+  transition: transform 60ms ease;
+}
+
+.piece.white { color: #fbf6ee; text-shadow: 0 1px 0 #00000055, 0 0 1px #000; }
+.piece.black { color: #241a12; text-shadow: 0 1px 0 #ffffff22; }
+
+.piece.dragging {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.5));
+  transform: scale(1.15);
+}
+
+/* ---------- captured-piece trays ---------- */
+
+.trays {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px var(--safe-right) 4px var(--safe-left);
+  min-height: 1.6em;
+}
+
+.tray {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  font-size: 1.05rem;
+  opacity: 0.85;
+  min-height: 1.4em;
+}
+.tray:last-child { justify-content: flex-end; }
+
+/* ---------- toolbar ---------- */
+
+.toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 6px var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+.tbtn {
+  flex: 1;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid #3a2f29;
+  border-radius: 12px;
+  font-size: 0.68rem;
+  font-family: inherit;
+  padding: 4px;
+}
+
+.tbtn:active { background: #362b25; }
+
+.tbtn svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--ink);
+}
+
+.diffgroup {
+  flex-direction: row;
+  gap: 4px;
+  padding: 4px;
+}
+
+.diffbtn {
+  flex: 1;
+  min-height: 40px;
+  border: 1px solid #3a2f29;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-dim);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.diffbtn.active {
+  background: var(--accent);
+  color: #241a12;
+  border-color: var(--accent);
+}
+
+/* ---------- toast (update banner etc.) ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(env(safe-area-inset-bottom), 12px);
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #241a12;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+/* The board sizes itself off the leftover space via container-query units (see
+   .board-slot / .board-frame above), so both portrait and landscape just work —
+   no orientation lock needed. */
+
+@media (min-width: 700px) {
+  .toolbar { max-width: 640px; margin: 0 auto; width: 100%; }
+  .trays { max-width: 640px; margin: 0 auto; width: 100%; }
+}
