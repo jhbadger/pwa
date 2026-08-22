@@ -160,8 +160,18 @@ body {
   transition: transform 60ms ease;
 }
 
-.piece.white { color: #fbf6ee; text-shadow: 0 1px 0 #00000055, 0 0 1px #000; }
-.piece.black { color: #241a12; text-shadow: 0 1px 0 #ffffff22; }
+/* A thin outline on every piece so white pieces still read against the light
+   squares (both are pale) and black pieces still read against the dark ones. */
+.piece.white {
+  color: #fdf8ef;
+  -webkit-text-stroke: 0.022em #241a12;
+  text-shadow: 0 0.02em 0.02em rgba(0, 0, 0, 0.35);
+}
+.piece.black {
+  color: #1b1310;
+  -webkit-text-stroke: 0.018em #fdf8ef;
+  text-shadow: 0 0.02em 0.02em rgba(0, 0, 0, 0.25);
+}
 
 .piece.dragging {
   position: fixed;
