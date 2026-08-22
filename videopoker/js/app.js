@@ -197,10 +197,29 @@ function restart() {
 
 // ---------- input ----------
 
-cardsRowEl.addEventListener('click', (e) => {
+// Pointer events, not click: the touchstart handler below calls preventDefault()
+// to stop iOS's callout bar, and per the touch-event spec that suppresses the
+// synthetic click Android would otherwise fire after a tap — pointerdown/up are
+// unaffected, so they're what still works there.
+let cardPointerDown = null; // { i, x, y }
+
+cardsRowEl.addEventListener('pointerdown', (e) => {
   const slot = e.target.closest('.card-slot');
   if (!slot) return;
-  toggleHold(Number(slot.dataset.i));
+  cardPointerDown = { i: Number(slot.dataset.i), x: e.clientX, y: e.clientY };
+});
+
+cardsRowEl.addEventListener('pointerup', (e) => {
+  if (!cardPointerDown) return;
+  const moved = Math.hypot(e.clientX - cardPointerDown.x, e.clientY - cardPointerDown.y) > 8;
+  const slot = e.target.closest('.card-slot');
+  const sameSlot = slot && Number(slot.dataset.i) === cardPointerDown.i;
+  if (!moved && sameSlot) toggleHold(cardPointerDown.i);
+  cardPointerDown = null;
+});
+
+cardsRowEl.addEventListener('pointercancel', () => {
+  cardPointerDown = null;
 });
 
 btnMain.addEventListener('click', () => {
