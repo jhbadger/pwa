@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#166149"/>
+      <stop offset="100%" stop-color="#062015"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- Content scaled/centered to sit inside the maskable safe zone (centered
+       80%-diameter circle), so OS icon masks (circle, squircle, rounded square)
+       never clip the card or chip. -->
+  <g transform="translate(256 256) scale(0.68) translate(-256 -256)">
+    <circle cx="336" cy="356" r="70" fill="#c8952f"/>
+    <circle cx="336" cy="356" r="70" fill="none" stroke="#f4d999" stroke-width="10" stroke-dasharray="14 14"/>
+    <circle cx="336" cy="356" r="40" fill="#a5762a"/>
+
+    <g transform="rotate(-9 256 256)">
+      <rect x="146" y="96" width="220" height="308" rx="20" fill="#f7f3ea" stroke="#00000022" stroke-width="2"/>
+      <text x="172" y="160" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="700" fill="#161010">A</text>
+      <path d="M256 168
+               C216 208 176 240 176 282
+               C176 312 200 332 228 332
+               C240 332 250 328 256 320
+               C262 328 272 332 284 332
+               C312 332 336 312 336 282
+               C336 240 296 208 256 168 Z"
+            fill="#161010"/>
+      <path d="M256 320 C248 344 234 356 214 366 L298 366 C278 356 264 344 256 320 Z" fill="#161010"/>
+      <text x="330" y="384" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="700" fill="#161010" transform="rotate(180 340 366)">A</text>
+    </g>
+  </g>
+</svg>
