@@ -3,7 +3,7 @@
 // failure is not enough. VERSION is a hash of the precached files' contents; run
 // `node scripts/build.mjs` after editing any of them so the browser detects a real update.
 
-const VERSION = '332ed6a840fa';
+const VERSION = '9be6a9102987';
 const CACHE_NAME = `minichess-${VERSION}`;
 
 // Everything the app needs to launch, cold, with no network at all.

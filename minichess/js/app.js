@@ -4,10 +4,12 @@ import {
 } from './chess.js';
 import { chooseComputerMove } from './ai.js';
 
-const GLYPH = {
-  w: { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙' },
-  b: { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' },
-};
+// Unicode has two chess-symbol sets: a hollow-outline "white" set (U+2654-2659)
+// and a solid-silhouette "black" set (U+265A-265F). The hollow set renders as
+// thin line art with barely any fill, so it's nearly invisible against a light
+// square no matter what CSS is applied to it. Use the solid set for both colors
+// and tell them apart with fill/stroke color instead (see .piece.white/.black).
+const GLYPH = { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' };
 
 const boardEl = document.getElementById('board');
 const statusEl = document.getElementById('status');
@@ -91,7 +93,7 @@ function render() {
       if (piece) {
         const p = document.createElement('span');
         p.className = 'piece ' + (piece.color === WHITE ? 'white' : 'black');
-        p.textContent = GLYPH[piece.color][piece.type];
+        p.textContent = GLYPH[piece.type];
         p.dataset.r = String(r);
         p.dataset.c = String(c);
         sq.appendChild(p);
@@ -113,8 +115,11 @@ function render() {
 }
 
 function renderTrays() {
-  trayWhiteEl.innerHTML = state.capturedByWhite.map((t) => GLYPH.b[t]).join('');
-  trayBlackEl.innerHTML = state.capturedByBlack.map((t) => GLYPH.w[t]).join('');
+  // capturedByWhite holds the (black) piece types White has captured, and vice versa.
+  trayWhiteEl.innerHTML = state.capturedByWhite
+    .map((t) => `<span class="piece black">${GLYPH[t]}</span>`).join('');
+  trayBlackEl.innerHTML = state.capturedByBlack
+    .map((t) => `<span class="piece white">${GLYPH[t]}</span>`).join('');
 }
 
 function renderStatus(status) {
