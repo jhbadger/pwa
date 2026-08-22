@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PWA Apps</title>
+<meta name="description" content="Jonathan Badger's collection of offline-first Progressive Web Apps.">
+<meta name="theme-color" content="#15161c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23e0954f'/%3E%3Ctext x='12' y='17' text-anchor='middle' font-size='14' font-family='Georgia,serif' fill='%2315161c'%3EB%3C/text%3E%3C/svg%3E">
+
+<style>
+  :root {
+    --bg: #15161c;
+    --panel: #1e2029;
+    --ink: #eeeef2;
+    --ink-dim: #9b9caa;
+    --accent: #e0954f;
+    --border: #2c2e3a;
+    --safe-top: max(env(safe-area-inset-top), 20px);
+    --safe-bottom: max(env(safe-area-inset-bottom), 20px);
+    --safe-left: max(env(safe-area-inset-left), 16px);
+    --safe-right: max(env(safe-area-inset-right), 16px);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    text-align: center;
+    max-width: 640px;
+    margin: 12px 0 32px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  header p {
+    margin: 8px 0 0;
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .grid {
+    width: 100%;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px 18px;
+    border-radius: 18px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--ink);
+    text-align: center;
+    transition: transform 120ms ease, border-color 120ms ease;
+  }
+
+  .card:active {
+    transform: scale(0.97);
+  }
+
+  @media (hover: hover) {
+    .card:hover {
+      border-color: var(--accent);
+    }
+  }
+
+  .card img {
+    width: 84px;
+    height: 84px;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .card h2 {
+    margin: 4px 0 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .card p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+    line-height: 1.4;
+  }
+
+  .card.placeholder {
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--ink-dim);
+    cursor: default;
+    justify-content: center;
+    min-height: 180px;
+  }
+
+  .card.placeholder .icon {
+    width: 84px;
+    height: 84px;
+    border-radius: 20px;
+    border: 1px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--border);
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-bottom: 12px;
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+  }
+
+  footer a {
+    color: var(--ink-dim);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>PWA Apps</h1>
+  <p>Small offline-first Progressive Web Apps — install any of these to your home screen and they work with no network at all.</p>
+</header>
+
+<div class="grid">
+  <a class="card" href="thermidor/">
+    <img src="thermidor/icons/icon-512.png" alt="">
+    <h2>Thermidor</h2>
+    <p>French Republican Calendar and decimal clock converter.</p>
+  </a>
+
+  <a class="card" href="minichess/">
+    <img src="minichess/icons/icon-512.png" alt="">
+    <h2>Minichess</h2>
+    <p>Gardner's 5x5 minichess against the computer.</p>
+  </a>
+
+  <div class="card placeholder" aria-hidden="true">
+    <div class="icon">+</div>
+    <p>More apps coming soon</p>
+  </div>
+</div>
+
+<footer>
+  <a href="https://github.com/jhbadger/pwa" target="_blank" rel="noopener">Source on GitHub</a>
+</footer>
+
+</body>
+</html>
