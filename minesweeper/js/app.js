@@ -278,7 +278,7 @@ boardEl.addEventListener('pointerdown', (e) => {
   const index = Number(cellEl.dataset.index);
   pointerStart = { pointerId: e.pointerId, index, x: e.clientX, y: e.clientY, longPressed: false };
   longPressTimer = setTimeout(() => {
-    if (!pointerStart || pointerStart.pointerId !== e.pointerId) return;
+    if (!pointerStart || pointerStart.pointerId !== e.pointerId || pointerStart.longPressed) return;
     pointerStart.longPressed = true;
     handleFlagToggle(pointerStart.index);
   }, LONG_PRESS_MS);
@@ -311,7 +311,16 @@ boardEl.addEventListener('contextmenu', (e) => {
   const cellEl = e.target.closest('.cell');
   if (!cellEl) return;
   e.preventDefault();
-  handleFlagToggle(Number(cellEl.dataset.index));
+  const index = Number(cellEl.dataset.index);
+  // On a touchscreen, Android/Chrome synthesizes this event from the very
+  // same long-press gesture the pointerdown timer above already handles —
+  // without this guard both fire and the flag toggles twice (on, then
+  // immediately back off), heard as two beeps rather than one. Whichever
+  // one notices the gesture first wins; the other is a no-op.
+  if (pointerStart && pointerStart.index === index && pointerStart.longPressed) return;
+  clearTimeout(longPressTimer);
+  pointerStart = null;
+  handleFlagToggle(index);
 });
 
 btnNewGame.addEventListener('click', () => newGame(state.difficulty));
