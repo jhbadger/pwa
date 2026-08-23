@@ -67,6 +67,37 @@ const BOOKS = [
     chapterRe: /^CHAPTER\s+[IVXLC]+$/,
     endLine: (line) => line.trim() === 'THE END',
   },
+  {
+    id: 'frankenstein',
+    title: 'Frankenstein',
+    author: 'Mary Wollstonecraft Shelley',
+    gutenbergId: 84,
+    // Bare "Letter 1" or "Chapter 1" — the table of contents has the same
+    // text but indented one space, so matching only column-0 lines skips it.
+    chapterRe: /^(?:Letter|Chapter)\s+\d+$/,
+    endLine: () => false,
+  },
+  {
+    id: 'black-beauty',
+    title: 'Black Beauty',
+    author: 'Anna Sewell',
+    gutenbergId: 271,
+    // "01 My Early Home" — zero-padded number, one space, title, all on one
+    // line. The table of contents pads with extra spaces after the number and
+    // indents the whole line, so the single-space, column-0 anchor skips it.
+    chapterRe: /^\d{2} .+$/,
+    // "Part I" — the table of contents indents this one too.
+    partRe: /^Part\s+[IVXLC]+$/,
+    endLine: () => false,
+    // Reformats "01 My Early Home" into the same "Chapter N / subtitle" look
+    // the other books get from their heading+subtitle merge, since here the
+    // number and title already arrive fused on one source line.
+    formatHeading: (text) => {
+      const m = text.match(/^(\d{2}) (.+)$/);
+      if (!m) return htmlEscape(text);
+      return `Chapter ${parseInt(m[1], 10)}<br><span class="subtitle">${htmlEscape(m[2])}</span>`;
+    },
+  },
 ];
 
 async function fetchText(gutenbergId) {
@@ -158,11 +189,11 @@ function parseBook(fullText, config) {
       if (next && next.kind === 'lines' && next.lines.length === 1) {
         const t = next.lines[0].trim();
         if (t.length > 0 && t.length <= 70 && !/[.!?]$/.test(t)) {
-          subtitle = htmlEscape(t);
+          subtitle = withItalics(htmlEscape(t));
           b++; // consume it
         }
       }
-      const main = htmlEscape(block.lines[0]);
+      const main = config.formatHeading ? config.formatHeading(block.lines[0]) : htmlEscape(block.lines[0]);
       blocks.push({
         tag: 'h2',
         html: subtitle ? `${main}<br><span class="subtitle">${subtitle}</span>` : main,

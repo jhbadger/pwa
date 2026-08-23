@@ -41,6 +41,24 @@ export const BOOKS = [
     icon: `<path d="M50 30 C40 15 20 20 10 35 C22 32 30 38 34 46 C24 46 16 54 12 66 C24 60 34 60 40 66 C44 58 47 52 50 50
                C53 52 56 58 60 66 C66 60 76 60 88 66 C84 54 76 46 66 46 C70 38 78 32 90 35 C80 20 60 15 50 30 Z"/>`,
   },
+  {
+    id: 'frankenstein',
+    title: 'Frankenstein',
+    author: 'Mary Wollstonecraft Shelley',
+    cover: 'frankenstein',
+    icon: `<path d="M50 8 L34 46 L46 46 L38 92 L68 42 L54 42 Z"/>
+      <circle cx="18" cy="55" r="7" fill="none" stroke="currentColor" stroke-width="4"/>
+      <circle cx="82" cy="55" r="7" fill="none" stroke="currentColor" stroke-width="4"/>`,
+  },
+  {
+    id: 'black-beauty',
+    title: 'Black Beauty',
+    author: 'Anna Sewell',
+    cover: 'black-beauty',
+    icon: `<path d="M30 90 L32 62 C20 56 16 44 22 32 C26 24 32 20 34 12
+               C40 18 40 26 38 32 C48 26 58 28 62 36 L70 34 L68 44 L60 46
+               C62 54 60 62 52 66 L54 90 L44 90 L42 68 L38 68 L38 90 Z"/>`,
+  },
 ];
 
 export function bookById(id) {

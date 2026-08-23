@@ -137,6 +137,8 @@ body {
 .cover--call-of-the-wild { --cover-bg: #16324a; background: linear-gradient(160deg, #1c3d59, #10202e); }
 .cover--alice { --cover-bg: #3a4f8c; background: linear-gradient(160deg, #47609e, #262f52); }
 .cover--dracula { --cover-bg: #2a0d10; background: linear-gradient(160deg, #3a1216, #180608); }
+.cover--frankenstein { --cover-bg: #253524; background: linear-gradient(160deg, #2e4130, #161f18); }
+.cover--black-beauty { --cover-bg: #4a2f1c; background: linear-gradient(160deg, #5a3a22, #2c1c10); }
 
 /* ---------- reader chrome ---------- */
 
