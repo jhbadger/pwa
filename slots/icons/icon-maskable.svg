@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#5c1f28"/>
+      <stop offset="100%" stop-color="#210a0e"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- Content scaled/centered to sit inside the maskable safe zone (centered
+       80%-diameter circle), so OS icon masks (circle, squircle, rounded square)
+       never clip the cherries. -->
+  <g transform="translate(256 256) scale(0.68) translate(-256 -256)">
+    <g transform="translate(256 266) scale(3.3) translate(-50 -50)">
+      <path d="M50 8 C54 24 56 30 50 36" fill="none" stroke="#5a8a3c" stroke-width="4" stroke-linecap="round"/>
+      <path d="M50 8 C44 4 34 4 30 12 C38 10 44 12 48 18" fill="#5a8a3c"/>
+      <path d="M50 8 C58 26 62 34 66 44" fill="none" stroke="#5a8a3c" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="34" cy="60" r="21" fill="#e0342f"/>
+      <circle cx="66" cy="64" r="21" fill="#e0342f"/>
+      <circle cx="26" cy="51" r="6.5" fill="#ff8f8f" opacity="0.75"/>
+      <circle cx="58" cy="55" r="6.5" fill="#ff8f8f" opacity="0.75"/>
+    </g>
+  </g>
+</svg>

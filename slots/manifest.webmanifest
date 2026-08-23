@@ -1,0 +1,16 @@
+{
+  "name": "Slots",
+  "short_name": "Slots",
+  "description": "Classic 3-reel fruit machine — cherries, lemons, bells and bars.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#2a0d12",
+  "theme_color": "#2a0d12",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
