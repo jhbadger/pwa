@@ -266,19 +266,34 @@ function handleFlagToggle(index) {
 // below for why. A long-press is a JS timer started on pointerdown and
 // cancelled on any real movement, so dragging to scroll the board (Expert
 // mode routinely needs this) never gets misread as a flag.
+//
+// On a touchscreen, a long-press ALSO makes Android/Chrome synthesize its
+// own contextmenu event for the very same physical gesture, once ITS OWN
+// long-press recognizer trips — and that has its own delay, separately
+// configurable in Android's accessibility settings (400ms-1500ms), so it
+// can fire anywhere from right after our timer to a second or more later.
+// Racing the two and debouncing by time is exactly as fragile as the
+// original bug, just with a bigger window: hold long enough and they're
+// still two independent toggles. So on touch, contextmenu is never allowed
+// to flag at all — it's always the tail end of a gesture our own timer
+// already handled, however long the hold runs. It still gets
+// preventDefault()'d so the OS menu never pops up; only real right-clicks
+// (pointerType 'mouse') go on to flag from here.
 const LONG_PRESS_MS = 420;
 const MOVE_THRESHOLD = 10;
 let longPressTimer = null;
 let pointerStart = null; // { pointerId, index, x, y, longPressed }
+let lastPointerType = 'mouse';
 
 boardEl.addEventListener('pointerdown', (e) => {
   if (state.phase === 'won' || state.phase === 'lost') return;
   const cellEl = e.target.closest('.cell');
   if (!cellEl) return;
+  lastPointerType = e.pointerType || 'mouse';
   const index = Number(cellEl.dataset.index);
   pointerStart = { pointerId: e.pointerId, index, x: e.clientX, y: e.clientY, longPressed: false };
   longPressTimer = setTimeout(() => {
-    if (!pointerStart || pointerStart.pointerId !== e.pointerId || pointerStart.longPressed) return;
+    if (!pointerStart || pointerStart.pointerId !== e.pointerId) return;
     pointerStart.longPressed = true;
     handleFlagToggle(pointerStart.index);
   }, LONG_PRESS_MS);
@@ -311,16 +326,10 @@ boardEl.addEventListener('contextmenu', (e) => {
   const cellEl = e.target.closest('.cell');
   if (!cellEl) return;
   e.preventDefault();
-  const index = Number(cellEl.dataset.index);
-  // On a touchscreen, Android/Chrome synthesizes this event from the very
-  // same long-press gesture the pointerdown timer above already handles —
-  // without this guard both fire and the flag toggles twice (on, then
-  // immediately back off), heard as two beeps rather than one. Whichever
-  // one notices the gesture first wins; the other is a no-op.
-  if (pointerStart && pointerStart.index === index && pointerStart.longPressed) return;
   clearTimeout(longPressTimer);
   pointerStart = null;
-  handleFlagToggle(index);
+  if (lastPointerType === 'touch' || lastPointerType === 'pen') return;
+  handleFlagToggle(Number(cellEl.dataset.index));
 });
 
 btnNewGame.addEventListener('click', () => newGame(state.difficulty));

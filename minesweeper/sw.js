@@ -3,7 +3,7 @@
 // on failure is not enough. VERSION is a hash of the precached files' contents; run
 // `node scripts/build.mjs` after editing any of them so the browser detects a real update.
 
-const VERSION = '122535f0d6fe';
+const VERSION = '14afd364d961';
 const CACHE_NAME = `minesweeper-${VERSION}`;
 
 // Everything the app needs to launch, cold, with no network at all.
