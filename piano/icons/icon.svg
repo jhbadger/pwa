@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#2a2438"/>
+      <stop offset="100%" stop-color="#0f0d16"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <g transform="translate(96,176)">
+    <rect x="0" y="0" width="320" height="160" rx="10" fill="#faf7f0"/>
+    <rect x="8" y="0" width="45.71" height="160" fill="none" stroke="#cfc8ba" stroke-width="2"/>
+    <rect x="53.71" y="0" width="45.71" height="160" fill="none" stroke="#cfc8ba" stroke-width="2"/>
+    <rect x="99.43" y="0" width="45.71" height="160" fill="none" stroke="#cfc8ba" stroke-width="2"/>
+    <rect x="145.14" y="0" width="45.71" height="160" fill="none" stroke="#cfc8ba" stroke-width="2"/>
+    <rect x="190.86" y="0" width="45.71" height="160" fill="none" stroke="#cfc8ba" stroke-width="2"/>
+    <rect x="236.57" y="0" width="45.71" height="160" fill="none" stroke="#cfc8ba" stroke-width="2"/>
+    <rect x="282.29" y="0" width="45.71" height="160" fill="none" stroke="#cfc8ba" stroke-width="2"/>
+    <rect x="30" y="0" width="26" height="96" rx="3" fill="#1b1a1f"/>
+    <rect x="75" y="0" width="26" height="96" rx="3" fill="#1b1a1f"/>
+    <rect x="145" y="0" width="26" height="96" rx="3" fill="#1b1a1f"/>
+    <rect x="190" y="0" width="26" height="96" rx="3" fill="#1b1a1f"/>
+    <rect x="235" y="0" width="26" height="96" rx="3" fill="#e0b34d"/>
+  </g>
+</svg>

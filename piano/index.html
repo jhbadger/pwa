@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Piano</title>
+<meta name="description" content="A two-octave piano with chords and a learn-by-highlighting mode for simple songs.">
+<meta name="theme-color" content="#14121a">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-512.png" sizes="512x512" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Piano">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="css/style.css">
+
+<script>
+  // Must run during head parse, before any layout, so standalone-only chrome
+  // never flashes on screen before disappearing.
+  (function () {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+    document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
+  })();
+</script>
+
+<script>
+  // Register as early as possible (during parse), not on window.load — waiting for
+  // every subresource means warming the cache last on the slow connection that needs it most.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <h1 class="title">Piano</h1>
+    <p class="status" id="status" aria-live="polite">Play freely, or pick a song below to learn it.</p>
+  </header>
+
+  <div class="controls">
+    <select class="songSelect" id="songSelect" aria-label="Song">
+      <option value="">🎹 Free Play</option>
+    </select>
+    <button type="button" class="cbtn" id="btnDemo" aria-label="Play demo" hidden>▶ Demo</button>
+    <button type="button" class="cbtn" id="btnRestart" aria-label="Restart song" hidden>↺ Restart</button>
+  </div>
+
+  <div class="keyboard-slot">
+    <div class="keyboard-frame">
+      <div class="keyboard" id="keyboard" role="group" aria-label="Piano keyboard, two octaves"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

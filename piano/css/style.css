@@ -1,0 +1,209 @@
+:root {
+  --bg: #14121a;
+  --panel: #1d1a24;
+  --ink: #f1ede6;
+  --ink-dim: #a8a0b0;
+  --accent: #e0b34d;
+  --next: #4ade80;
+  --key-white: #faf7f0;
+  --key-white-label: #8a8378;
+  --key-black: #1b1a1f;
+  --safe-top: max(env(safe-area-inset-top), 12px);
+  --safe-bottom: max(env(safe-area-inset-bottom), 12px);
+  --safe-left: max(env(safe-area-inset-left), 10px);
+  --safe-right: max(env(safe-area-inset-right), 10px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.app {
+  height: 100dvh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  flex: 0 0 auto;
+  padding: var(--safe-top) var(--safe-right) 4px var(--safe-left);
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.status {
+  margin: 2px 0 0;
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+}
+
+/* ---------- controls ---------- */
+
+.controls {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  padding: 6px var(--safe-right) 6px var(--safe-left);
+}
+
+.songSelect {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid #322d3a;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0 10px;
+}
+
+.cbtn {
+  flex: 0 0 auto;
+  min-height: 44px;
+  min-width: 72px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid #322d3a;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0 10px;
+}
+
+.cbtn:active { background: #2a2531; }
+
+/* ---------- keyboard ---------- */
+
+.keyboard-slot {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 4px var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+/* Real keys are long and thin (roughly 4x taller than wide); stretching them
+   to fill a portrait phone's whole leftover height looks nothing like a
+   piano, so the frame keeps that proportion and centers in the leftover
+   space instead, the same way the board apps center a fixed-ratio board. */
+.keyboard-frame {
+  position: relative;
+  width: min(100%, 1100px);
+  aspect-ratio: 15 / 4;
+  max-height: 100%;
+}
+
+.keyboard {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  background: #0c0a10;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+.key {
+  touch-action: none;
+  cursor: pointer;
+}
+
+.key.white {
+  position: relative;
+  flex: 1 0 0;
+  height: 100%;
+  background: var(--key-white);
+  border-left: 1px solid #cfc8ba;
+  border-bottom: 4px solid #d8d1c2;
+  border-radius: 0 0 6px 6px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+  z-index: 1;
+}
+.key.white:first-child { border-left: none; }
+
+.key.white .label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--key-white-label);
+  pointer-events: none;
+}
+
+.key.white.pressed {
+  background: #f3e2b8;
+  border-bottom-color: var(--accent);
+}
+
+.key.black {
+  position: absolute;
+  top: 0;
+  height: 58%;
+  background: linear-gradient(#3a3742, var(--key-black));
+  border-radius: 0 0 4px 4px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.key.black.pressed {
+  background: linear-gradient(#5a4a2a, #2a2010);
+}
+
+.key.next {
+  box-shadow: inset 0 0 0 3px var(--next), 0 0 12px 2px rgba(74, 222, 128, 0.7);
+}
+.key.white.next { background: #dcf7e6; }
+.key.black.next { background: linear-gradient(#2f5a41, #163826); }
+
+/* ---------- toast (update banner etc.) ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(env(safe-area-inset-bottom), 12px);
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #241a12;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+@media (min-width: 700px) {
+  .controls { max-width: 640px; margin: 0 auto; width: 100%; }
+}
