@@ -376,9 +376,36 @@ function parsePage(rawHTML) {
   return blocks;
 }
 
+// ---------- paragraph rejoining ----------
+// Wikisource's proofread transclusion is assembled one scanned page at a
+// time; when a single running paragraph spans a page image, the two halves
+// come through as separate sibling <p> elements instead of one continuous
+// paragraph. Detect that (a 'p' block with no sentence-ending punctuation at
+// its end, immediately followed by a 'p' block starting mid-word in
+// lowercase) and rejoin them so the reader doesn't show a paragraph break in
+// the middle of a sentence.
+function mergeSplitParagraphs(blocks) {
+  const merged = [];
+  for (const block of blocks) {
+    const prev = merged[merged.length - 1];
+    if (prev && prev.tag === 'p' && block.tag === 'p') {
+      const prevPlain = prev.html.replace(/<[^>]+>/g, '').trim();
+      const plain = block.html.replace(/<[^>]+>/g, '').trim();
+      const endsMidSentence = prevPlain && !/[.!?"'”)\]:;]$/.test(prevPlain);
+      const continuesLowercase = /^[a-z]/.test(plain);
+      if (endsMidSentence && continuesLowercase) {
+        prev.html = `${prev.html} ${block.html}`;
+        continue;
+      }
+    }
+    merged.push(block);
+  }
+  return merged;
+}
+
 // ---------- driver ----------
 
-const allBlocks = [];
+let allBlocks = [];
 for (const page of PAGES) {
   process.stdout.write(`Fetching ${page.title}... `);
   const rawHTML = await fetchChapterHTML(page.title);
@@ -388,6 +415,8 @@ for (const page of PAGES) {
   // Be a polite API citizen.
   await new Promise((r) => setTimeout(r, 1000));
 }
+
+allBlocks = mergeSplitParagraphs(allBlocks);
 
 const wordCount = allBlocks.reduce(
   (n, b) => n + b.html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length,
