@@ -19,6 +19,7 @@ Live at **[jhbadger.github.io/pwa](https://jhbadger.github.io/pwa/)**.
 | [Piano](piano/) | Two-octave piano with chords, plus a learn-by-highlighting mode for simple songs. |
 | [Slots](slots/) | Classic 3-reel fruit machine — cherries, lemons, bells and bars, with sound effects. |
 | [Minesweeper](minesweeper/) | Classic Minesweeper with three difficulty levels and sound effects. |
+| [Peg Solitaire](peg-solitaire/) | Classic peg solitaire on the 33-hole English cross board, with sound effects. |
 
 ## Structure
 
