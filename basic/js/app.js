@@ -55,6 +55,12 @@ const vfs = {
     }
     return out.sort();
   },
+  async deleteFile(name) {
+    const key = FS_PREFIX + name;
+    const existed = localStorage.getItem(key) !== null;
+    localStorage.removeItem(key);
+    return existed;
+  },
 };
 
 const AUTOSAVE_KEY = 'basic:autosave';
@@ -271,7 +277,7 @@ function doList() {
 }
 
 function showHelp() {
-  writeScreen('Commands   : RUN  LIST  NEW  LOAD file  SAVE file  CLEAR  BYE\n');
+  writeScreen('Commands   : RUN  LIST  NEW  LOAD file  SAVE file  DELETE file  CLEAR  BYE\n');
   writeScreen('Statements : PRINT(?) INPUT LET IF/THEN/ELSE WHILE/WEND FOR/TO/STEP/NEXT\n');
   writeScreen('             GOTO GOSUB/RETURN ON..GOTO/GOSUB END STOP DIM DATA/READ/RESTORE\n');
   writeScreen('             CLS LOCATE DEFN/ENDFN (user functions)\n');
@@ -352,6 +358,7 @@ const HELP_TOPICS = {
   NEW: 'NEW  (erase program and variables)',
   CLEAR: 'CLEAR  (erase variables, keep program)',
   LOAD: 'LOAD file        SAVE file  (stored in browser storage)', SAVE: 'See HELP LOAD.',
+  DELETE: 'DELETE file  -- removes a file from browser storage (see also FILES).\n  Aliases: KILL.', KILL: 'See HELP DELETE.',
   BYE: 'BYE / QUIT / EXIT / SYSTEM  (there is nothing to exit in a browser tab —\n  just close it, or type NEW to start fresh)',
   QUIT: 'See HELP BYE.', EXIT: 'See HELP BYE.', SYSTEM: 'See HELP BYE.',
 };
@@ -406,6 +413,10 @@ async function handleLine(raw) {
     const name = stripQuotes(argStr);
     try { await vfs.writeFile(name, interp.programText()); writeScreen('SAVED\n'); }
     catch { writeScreen('SAVE FAILED\n'); }
+  } else if (cmd === 'DELETE' || cmd === 'KILL') {
+    const name = stripQuotes(argStr);
+    const existed = await vfs.deleteFile(name);
+    writeScreen(existed ? 'DELETED\n' : 'CANNOT FIND ' + name + '\n');
   } else if (cmd === 'DEFN') {
     await readReplDefn(expandQuestionMarks(line));
   } else {
