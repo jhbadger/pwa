@@ -1,6 +1,6 @@
 // Quick correctness check for the reel/payout logic — not shipped to the app, dev-only.
 import {
-  SYMBOLS, REEL_STRIP, PAY_TABLE, PAYOUT_3, PAYOUT_CHERRY_2, PAYOUT_CHERRY_1,
+  SYMBOLS, REEL_STRIP, PAY_TABLE, PAYOUT_3, PAYOUT_CHERRY_PAIR,
   rollReels, evaluateSpin, isJackpot,
 } from '../js/slots.js';
 
@@ -28,9 +28,16 @@ for (const sym of SYMBOLS) {
 check('triple seven', evaluateSpin(['seven', 'seven', 'seven']), { key: 'seven', payout: PAYOUT_3.seven, label: 'Triple Seven!' });
 check('triple bar', evaluateSpin(['bar', 'bar', 'bar']), { key: 'bar', payout: PAYOUT_3.bar, label: 'Triple Bar!' });
 check('triple cherry', evaluateSpin(['cherry', 'cherry', 'cherry']), { key: 'cherry', payout: PAYOUT_3.cherry, label: 'Triple Cherry!' });
-check('two cherries', evaluateSpin(['cherry', 'cherry', 'lemon']), { key: 'cherry2', payout: PAYOUT_CHERRY_2, label: 'Two Cherries!' });
-check('one cherry', evaluateSpin(['cherry', 'lemon', 'bell']), { key: 'cherry1', payout: PAYOUT_CHERRY_1, label: 'Cherry' });
-check('cherry must lead: lemon-cherry-cherry does not count', evaluateSpin(['lemon', 'cherry', 'cherry']), { key: null, payout: 0, label: 'No match' });
+
+// Two cherries pay regardless of which two reels they land on — this is a
+// regression test for a real bug report: an earlier version only checked
+// reels 1+2, so cherries in reels 2+3 (or 1+3) silently paid nothing.
+const cherryPairExpected = { key: 'cherryPair', payout: PAYOUT_CHERRY_PAIR, label: 'Two Cherries!' };
+check('two cherries: reels 1+2', evaluateSpin(['cherry', 'cherry', 'lemon']), cherryPairExpected);
+check('two cherries: reels 2+3', evaluateSpin(['orange', 'cherry', 'cherry']), cherryPairExpected);
+check('two cherries: reels 1+3', evaluateSpin(['cherry', 'lemon', 'cherry']), cherryPairExpected);
+
+check('one cherry does not pay', evaluateSpin(['cherry', 'lemon', 'bell']).payout, 0);
 check('no match', evaluateSpin(['lemon', 'orange', 'bell']), { key: null, payout: 0, label: 'No match' });
 check('mixed non-cherry triple-looking (2 same, not 3)', evaluateSpin(['bell', 'bell', 'bar']).payout, 0);
 
@@ -47,7 +54,7 @@ for (const row of PAY_TABLE) {
 
 // RTP sanity: expected value per $1 bet should sit in a plausible casino-like
 // range (not free money, not a guaranteed drain). Exact value documented in
-// slots.js's WEIGHTS/PAYOUT comment as ~88%.
+// slots.js's WEIGHTS/PAYOUT comment as ~79.5%.
 let ev = 0;
 for (const a of SYMBOLS) {
   for (const b of SYMBOLS) {
