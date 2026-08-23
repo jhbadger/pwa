@@ -55,9 +55,12 @@ export const BOOKS = [
     title: 'Black Beauty',
     author: 'Anna Sewell',
     cover: 'black-beauty',
-    icon: `<path d="M30 90 L32 62 C20 56 16 44 22 32 C26 24 32 20 34 12
-               C40 18 40 26 38 32 C48 26 58 28 62 36 L70 34 L68 44 L60 46
-               C62 54 60 62 52 66 L54 90 L44 90 L42 68 L38 68 L38 90 Z"/>`,
+    icon: `<path d="M50 10 L44 22 C50 24 60 25 70 28 C80 31 88 35 92 40
+               C94 44 93 48 90 52 C86 54 80 54 76 50 C74 53 72 55 74 58
+               C70 62 66 66 62 70 L58 90 L33 90 L45 80.8 L33 71.5 L45 62.2
+               L33 53 L45 43.8 L33 34.5 L45 25.2 L33 16 Z"/>
+      <circle cx="58" cy="26" r="3" fill="var(--cover-bg)"/>
+      <path d="M84 44 L90 44" stroke="var(--cover-bg)" stroke-width="2.2" stroke-linecap="round"/>`,
   },
   {
     id: 'das-kapital',
