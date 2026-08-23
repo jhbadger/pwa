@@ -76,7 +76,7 @@ ok('same block, later wordOffset sorts after', compareMarkers({ blockIndex: 3, w
 
 // ---------- bundled book content ----------
 
-ok('6 books registered', BOOKS.length === 6);
+ok('7 books registered', BOOKS.length === 7);
 for (const meta of BOOKS) {
   const path = join(root, 'content', `${meta.id}.json`);
   let book;

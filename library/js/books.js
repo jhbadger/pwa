@@ -59,6 +59,15 @@ export const BOOKS = [
                C40 18 40 26 38 32 C48 26 58 28 62 36 L70 34 L68 44 L60 46
                C62 54 60 62 52 66 L54 90 L44 90 L42 68 L38 68 L38 90 Z"/>`,
   },
+  {
+    id: 'das-kapital',
+    title: 'Capital',
+    author: 'Karl Marx',
+    cover: 'das-kapital',
+    icon: `<circle cx="50" cy="50" r="32" fill="none" stroke="currentColor" stroke-width="6"/>
+      <path d="M40 34 L40 66 M40 34 L54 34 C62 34 62 48 54 48 L40 48 M40 48 L56 48 C64 48 64 66 54 66 L40 66"
+            fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
+  },
 ];
 
 export function bookById(id) {
