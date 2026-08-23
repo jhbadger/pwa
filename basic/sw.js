@@ -3,7 +3,7 @@
 // failure is not enough. VERSION is a hash of the precached files' contents; run
 // `node scripts/build.mjs` after editing any of them so the browser detects a real update.
 
-const VERSION = '43e746c48df1';
+const VERSION = '2b992601da8a';
 const CACHE_NAME = `basic-${VERSION}`;
 
 // Everything the app needs to launch, cold, with no network at all.
