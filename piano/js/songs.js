@@ -40,6 +40,15 @@ export const SONGS = [
     notes: parse('G4 A4 G4 F4 E4 F4 G4:2 D4 E4 F4:2 E4 F4 G4:2 ' +
       'G4 A4 G4 F4 E4 F4 G4:2 D4 G4 E4 C4:2'),
   },
+  {
+    id: 'wisconsin',
+    title: 'On, Wisconsin!',
+    // Main strain (the "fight, fight, fight" phrase), played twice as in the
+    // original march. Transcribed from W.T. Purdy's 1909 score (public
+    // domain), key of D major — the C's here are C#5 per that key signature.
+    notes: parse('D5 C#5 D5:0.5 C#5:0.5 B4:0.5 A4:0.5 B4:0.75 B4:0.25 B4:0.5 B4:0.5 B4 D5:1.5 ' +
+      'D5 C#5 D5:0.5 C#5:0.5 B4:0.5 A4:0.5 B4:0.75 B4:0.25 B4:0.5 B4:0.5 B4 D5:1.5'),
+  },
 ];
 
 // "C4" or "C4:1.5" (note:duration, duration defaults to 1 = one beat).
