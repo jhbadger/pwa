@@ -3,7 +3,7 @@
 // failure is not enough. VERSION is a hash of the precached files' contents; run
 // `node scripts/build.mjs` after editing any of them so the browser detects a real update.
 
-const VERSION = '46530030abe1';
+const VERSION = '92b2d01125b8';
 const CACHE_NAME = `videopoker-${VERSION}`;
 
 // Everything the app needs to launch, cold, with no network at all.
@@ -14,6 +14,7 @@ const PRECACHE = [
   'css/style.css',
   'js/app.js',
   'js/poker.js',
+  'js/sound.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/icon-512-maskable.png',

@@ -1,8 +1,11 @@
 import {
-  Bet, StartMoney, PAY_TABLE, OnePair,
+  Bet, StartMoney, PAY_TABLE, OnePair, RoyalFlush,
   createDeck, shuffle, cardSuit, cardRank, isRed, rankLabel,
   scoreHand, isJacksOrBetter, handPayout, resultLabel, SUIT_SYMBOL,
 } from './poker.js';
+import {
+  playCardDeal, playHoldToggle, playWin, playJackpot, playPush, playLose, playOutOfMoney,
+} from './sound.js';
 
 const cardsRowEl = document.getElementById('cardsRow');
 const resultEl = document.getElementById('result');
@@ -144,6 +147,7 @@ function deal() {
   if (state.money < Bet) {
     state.phase = 'over';
     render();
+    playOutOfMoney();
     return;
   }
   state.money -= Bet;
@@ -156,20 +160,25 @@ function deal() {
   state.payout = 0;
   state.phase = 'draw';
   render();
+  for (let i = 0; i < 5; i++) playCardDeal(i);
 }
 
 function toggleHold(i) {
   if (state.phase !== 'draw') return;
   state.hold[i] = !state.hold[i];
   render();
+  playHoldToggle(state.hold[i]);
 }
 
 function draw() {
   if (state.phase !== 'draw') return;
+  let replaced = 0;
   for (let i = 0; i < 5; i++) {
     if (!state.hold[i]) {
       state.hand[i] = state.deck[state.deckTop];
       state.deckTop++;
+      playCardDeal(replaced);
+      replaced++;
     }
   }
   state.handRank = scoreHand(state.hand);
@@ -180,6 +189,15 @@ function draw() {
   if (state.payout > 0) state.won++;
   state.phase = 'show';
   render();
+
+  const net = state.payout - Bet;
+  const delay = replaced * 70 + 120; // let the draw-card snaps finish first
+  setTimeout(() => {
+    if (state.handRank === RoyalFlush && net > 0) playJackpot();
+    else if (net > 0) playWin(state.payout / Bet);
+    else if (net === 0) playPush();
+    else playLose();
+  }, delay);
 }
 
 function restart() {
