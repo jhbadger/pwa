@@ -18,6 +18,7 @@ Live at **[jhbadger.github.io/pwa](https://jhbadger.github.io/pwa/)**.
 | [BASIC](basic/) | A line-numbered BASIC interpreter with canvas graphics and sound. |
 | [Piano](piano/) | Two-octave piano with chords, plus a learn-by-highlighting mode for simple songs. |
 | [Slots](slots/) | Classic 3-reel fruit machine — cherries, lemons, bells and bars, with sound effects. |
+| [Minesweeper](minesweeper/) | Classic Minesweeper with three difficulty levels and sound effects. |
 
 ## Structure
 
