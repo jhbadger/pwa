@@ -43,11 +43,14 @@ export const SONGS = [
   {
     id: 'wisconsin',
     title: 'On, Wisconsin!',
-    // Opening phrase ("On, Wisconsin! On, Wisconsin! Grand old Badger
-    // State!"), transcribed from the beginner arrangement at
-    // bethsnotesplus.com/2017/06/on-wisconsin.html (F major).
-    notes: parse('C4 A4:0.5 D4:0.5 C4:0.5 F4 E4:0.5 G4:0.5 F4 ' +
-      'A4:0.5 A4:0.5 A4:0.5 A4:0.5 F4:2 G4:0.5 F4:0.5 G4:0.5 A4'),
+    // From the user's own MIDI arrangement (French Horn melody track) —
+    // exact pitches and durations read straight from the note-on/note-off
+    // events, so no transcription guesswork here.
+    notes: parse('F5:1.5 E5:0.5 D#5:1.5 D5:0.5 C5:0.5 A#4:0.5 A4:0.5 G4:0.5 F4:0.5 ' +
+      'F4:1.5 D#4:0.5 G4 F4 A#4:1.5 A4:0.5 C5 A#4 D5 D5 D5 D5 D5:3.5 ' +
+      'C5:1.5 A#4:0.5 C5 D5 A#4:1.5 C5:0.5 D5 A#4:0.5 A#4:0.5 A4 G4 A4 A#4 C5:2.5 ' +
+      'A4:0.5 G4:0.5 F4:0.5 F4:1.5 D#4:0.5 G4 F4 A#4:1.5 A4:0.5 C5 A#4 C5 A#4 C5 C5 D5:4 ' +
+      'D#5:1.5 A#4 C5 D5 D#5 F5 G5 D5:2 C5:2 A#4:2.5 A#4:0.5'),
   },
 ];
 
