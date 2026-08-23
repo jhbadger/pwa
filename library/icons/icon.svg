@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#4a3623"/>
+      <stop offset="100%" stop-color="#201509"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- An open book with a bookmark ribbon — plain vector shapes, no scanned
+       cover art or font dependency. -->
+  <g>
+    <path d="M96 168 C160 148 216 156 256 180 L256 372 C216 348 160 340 96 360 Z" fill="#f4e9d6"/>
+    <path d="M416 168 C352 148 296 156 256 180 L256 372 C296 348 352 340 416 360 Z" fill="#e9dcc2"/>
+    <path d="M256 180 L256 372" stroke="#00000022" stroke-width="4"/>
+    <g stroke="#8a7454" stroke-width="5" stroke-linecap="round">
+      <path d="M124 196 L214 182"/>
+      <path d="M124 224 L214 212"/>
+      <path d="M124 252 L214 242"/>
+      <path d="M388 196 L298 182"/>
+      <path d="M388 224 L298 212"/>
+      <path d="M388 252 L298 242"/>
+    </g>
+    <path d="M226 140 L286 140 L286 232 L256 210 L226 232 Z" fill="#c8952f"/>
+  </g>
+</svg>
