@@ -85,7 +85,7 @@ window.addEventListener('resize', () => {
 // blocking real clicks on buttons or the page-flip gesture area (which needs
 // its own pointerdown/up handling in reader.js, unaffected by this).
 document.addEventListener('touchstart', (e) => {
-  if (e.target.closest('button')) return;
+  if (e.target.closest('button, #toast')) return;
   e.preventDefault();
 }, { passive: false });
 

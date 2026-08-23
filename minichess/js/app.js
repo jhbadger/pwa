@@ -351,7 +351,7 @@ boardEl.addEventListener('pointercancel', endDrag);
 // Stop iOS's copy/select callout bar from popping up on repeated taps, without
 // blocking real clicks on the toolbar buttons.
 document.addEventListener('touchstart', (e) => {
-  if (e.target.closest('button')) return;
+  if (e.target.closest('button, #toast')) return;
   e.preventDefault();
 }, { passive: false });
 

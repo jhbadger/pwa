@@ -282,7 +282,7 @@ btnShuffle.addEventListener('click', doShuffle);
 // (the board needs real touchmove-driven scroll, which a touchstart preventDefault
 // would break, so it's exempted here the same way buttons are).
 document.addEventListener('touchstart', (e) => {
-  if (e.target.closest('button') || e.target.closest('#boardWrap')) return;
+  if (e.target.closest('button') || e.target.closest('#boardWrap') || e.target.closest('#toast')) return;
   e.preventDefault();
 }, { passive: false });
 

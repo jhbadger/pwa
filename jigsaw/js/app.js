@@ -579,7 +579,7 @@ function relayout() {
 // ---------- iOS "Copy/Look Up" callout suppression ----------
 
 document.addEventListener('touchstart', (e) => {
-  if (e.target.closest('button, input, label, a')) return;
+  if (e.target.closest('button, input, label, a, #toast')) return;
   e.preventDefault();
 }, { passive: false });
 
