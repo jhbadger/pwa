@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#1c3a41"/>
+      <stop offset="100%" stop-color="#0a1518"/>
+    </radialGradient>
+    <linearGradient id="pipe" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5fe8ff"/>
+      <stop offset="100%" stop-color="#1f9fc4"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- Content scaled/centered to sit inside the maskable safe zone (centered
+       80%-diameter circle), so OS icon masks (circle, squircle, rounded square)
+       never clip the pipe or droplet. -->
+  <g transform="translate(256 256) scale(0.72) translate(-256 -256)">
+    <g transform="translate(96 96) scale(3.2)">
+      <path d="M50 0 Q50 50 100 50" fill="none" stroke="url(#pipe)" stroke-width="30" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(352 340)">
+      <path d="M0 -34 C20 -8 30 12 30 28 C30 46 16 60 0 60 C-16 60 -30 46 -30 28 C-30 12 -20 -8 0 -34 Z" fill="#e3b23c"/>
+    </g>
+  </g>
+</svg>

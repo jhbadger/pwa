@@ -20,6 +20,7 @@ Live at **[jhbadger.github.io/pwa](https://jhbadger.github.io/pwa/)**.
 | [Slots](slots/) | Classic 3-reel fruit machine — cherries, lemons, bells and bars, with sound effects. |
 | [Minesweeper](minesweeper/) | Classic Minesweeper with three difficulty levels and sound effects. |
 | [Peg Solitaire](peg-solitaire/) | Classic peg solitaire on the 33-hole English cross board, with sound effects. |
+| [Pipe Dream](pipe-dream/) | Lay pipe ahead of the water before it leaks — with sound effects. |
 
 ## Structure
 
