@@ -209,10 +209,29 @@ function newGame() {
 
 // ---------- input ----------
 
-boardEl.addEventListener('click', (e) => {
+// Pointer events, not click: the touchstart handler below calls preventDefault()
+// to stop iOS's callout bar, and per the touch-event spec that suppresses the
+// synthetic click Android would otherwise fire after a tap — pointerdown/up are
+// unaffected, so they're what still works there.
+let cellPointerDown = null; // { index, x, y }
+
+boardEl.addEventListener('pointerdown', (e) => {
   const cellEl = e.target.closest('.cell');
   if (!cellEl) return;
-  placeAt(Number(cellEl.dataset.index));
+  cellPointerDown = { index: Number(cellEl.dataset.index), x: e.clientX, y: e.clientY };
+});
+
+boardEl.addEventListener('pointerup', (e) => {
+  if (!cellPointerDown) return;
+  const moved = Math.hypot(e.clientX - cellPointerDown.x, e.clientY - cellPointerDown.y) > 8;
+  const cellEl = e.target.closest('.cell');
+  const sameCell = cellEl && Number(cellEl.dataset.index) === cellPointerDown.index;
+  if (!moved && sameCell) placeAt(cellPointerDown.index);
+  cellPointerDown = null;
+});
+
+boardEl.addEventListener('pointercancel', () => {
+  cellPointerDown = null;
 });
 
 btnNewGame.addEventListener('click', newGame);

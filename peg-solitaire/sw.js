@@ -3,7 +3,7 @@
 // on failure is not enough. VERSION is a hash of the precached files' contents; run
 // `node scripts/build.mjs` after editing any of them so the browser detects a real update.
 
-const VERSION = 'f01fa19152f6';
+const VERSION = 'b8bd45917d57';
 const CACHE_NAME = `peg-solitaire-${VERSION}`;
 
 // Everything the app needs to launch, cold, with no network at all.
