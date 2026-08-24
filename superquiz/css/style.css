@@ -1,0 +1,223 @@
+:root {
+  --bg: #161a23;
+  --panel: #1f2530;
+  --panel-2: #262d3a;
+  --ink: #eef0f5;
+  --ink-dim: #9aa2b4;
+  --accent: #e0954f;
+  --accent-ink: #161a23;
+  --reveal: #5fb87e;
+  --border: #2e3646;
+  --safe-top: max(env(safe-area-inset-top), 12px);
+  --safe-bottom: max(env(safe-area-inset-bottom), 12px);
+  --safe-left: max(env(safe-area-inset-left), 12px);
+  --safe-right: max(env(safe-area-inset-right), 12px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.app {
+  height: 100dvh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  flex: 0 0 auto;
+  padding: var(--safe-top) var(--safe-right) 8px var(--safe-left);
+  text-align: center;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.difficulty-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.diff-btn {
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink-dim);
+}
+.diff-btn:active { background: var(--panel-2); }
+
+.diff-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---------- content ---------- */
+
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px var(--safe-right) 12px var(--safe-left);
+  -webkit-overflow-scrolling: touch;
+}
+
+.category {
+  margin: 4px 2px 10px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+}
+
+.quiz-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.qcard {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.qcard-btn {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 12px 14px;
+  gap: 0 10px;
+}
+.qcard-btn:active { background: var(--panel-2); }
+
+.qnum {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 1.4em;
+}
+
+.qtext {
+  flex: 1 1 auto;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.atext {
+  flex-basis: 100%;
+  display: none;
+  margin: 8px 0 0 1.4em;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--reveal);
+}
+
+.qcard.revealed .qcard-btn {
+  background: var(--panel-2);
+}
+.qcard.revealed .atext {
+  display: block;
+}
+
+/* ---------- toolbar ---------- */
+
+.toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  padding: 8px var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+.tbtn {
+  flex: 1;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--ink);
+}
+.tbtn:active { background: var(--panel-2); }
+
+.tbtn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.tbtn-primary:active { background: #c67d3a; }
+
+.tbtn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* ---------- toast (update banner etc.) ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(env(safe-area-inset-bottom), 12px);
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+@media (min-width: 700px) {
+  .toolbar { max-width: 640px; margin: 0 auto; width: 100%; }
+}
