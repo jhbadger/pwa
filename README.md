@@ -23,6 +23,7 @@ Live at **[jhbadger.github.io/pwa](https://jhbadger.github.io/pwa/)**.
 | [Pipe Dream](pipe-dream/) | Lay pipe ahead of the water before it leaks — with sound effects. |
 | [SuperQuiz](superquiz/) | Isaac Asimov Presents SuperQuiz — thousands of trivia questions at three levels of difficulty. |
 | [Klondike Solitaire](klondike/) | Classic Klondike solitaire with sound effects. |
+| [Dice Roller](dice/) | Roll any mix of d4, d6, d8, d10, d12, d20 and d100 dice, with sound effects. |
 
 ## Structure
 

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="85%">
+      <stop offset="0%" stop-color="#4a2f8a"/>
+      <stop offset="100%" stop-color="#160f24"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- d20: hexagonal silhouette with facet lines -->
+  <g transform="rotate(-18 200 235)">
+    <polygon points="200,153 267,192 267,270 200,309 133,270 133,192" fill="#8b6cf0"/>
+    <polygon points="200,153 267,192 200,231 133,192" fill="#a48af5"/>
+    <polygon points="200,231 267,192 267,270 200,309" fill="#7357d6"/>
+    <path d="M200 153 L200 309 M133 192 L200 231 L267 192 M133 270 L200 231 L267 270" fill="none" stroke="#5a3fb8" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+
+  <!-- d6: rounded cube face with five pips -->
+  <g transform="rotate(14 320 300)">
+    <rect x="245" y="225" width="150" height="150" rx="26" fill="#f2e9d8" stroke="rgba(0,0,0,0.2)" stroke-width="3"/>
+    <circle cx="279" cy="259" r="12" fill="#241934"/>
+    <circle cx="361" cy="259" r="12" fill="#241934"/>
+    <circle cx="320" cy="300" r="12" fill="#241934"/>
+    <circle cx="279" cy="341" r="12" fill="#241934"/>
+    <circle cx="361" cy="341" r="12" fill="#241934"/>
+  </g>
+</svg>

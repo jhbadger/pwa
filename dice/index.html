@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Dice Roller</title>
+<meta name="description" content="Roll any mix of d4, d6, d8, d10, d12, d20 and d100 dice, with sound effects.">
+<meta name="theme-color" content="#160f24">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-512.png" sizes="512x512" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Dice Roller">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="css/style.css">
+
+<script>
+  // Must run during head parse, before any layout, so standalone-only chrome
+  // never flashes on screen before disappearing.
+  (function () {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+    document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
+  })();
+</script>
+
+<script>
+  // Register as early as possible (during parse), not on window.load — waiting for
+  // every subresource means warming the cache last on the slow connection that needs it most.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <h1 class="title">Dice Roller</h1>
+    <p class="status" id="status" aria-live="polite">Tap a die below to add it to your roll</p>
+  </header>
+
+  <div class="table">
+    <div class="picker" id="picker" role="group" aria-label="Add a die"></div>
+
+    <div class="pool" id="pool"></div>
+
+    <div class="results" id="results"></div>
+
+    <p class="sum" id="sum"></p>
+  </div>
+
+  <div class="stats" id="stats">Rolls: 0</div>
+
+  <footer class="toolbar">
+    <button type="button" class="tbtn ghost" id="btnClear" aria-label="Clear the dice pool">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12M10 7V5a1 1 0 011-1h2a1 1 0 011 1v2m-7 0 1 13a1 1 0 001 1h6a1 1 0 001-1l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Clear</span>
+    </button>
+    <button type="button" class="tbtn primary" id="btnRoll" disabled>Roll</button>
+  </footer>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

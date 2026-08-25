@@ -1,0 +1,16 @@
+{
+  "name": "Dice Roller",
+  "short_name": "Dice Roller",
+  "description": "Roll any mix of d4, d6, d8, d10, d12, d20 and d100 dice, with sound effects.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#160f24",
+  "theme_color": "#160f24",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
