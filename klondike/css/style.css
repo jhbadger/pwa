@@ -242,6 +242,22 @@ body {
 }
 .tbtn:disabled svg { fill: var(--ink-dim); }
 
+/* ---------- drag layer (floating clones while dragging a card) ---------- */
+
+.drag-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 150;
+}
+
+.drag-clone {
+  position: fixed;
+  border-radius: calc(var(--card-w) * 0.09);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+  will-change: transform;
+}
+
 /* ---------- toast (update banner etc.) ---------- */
 
 .toast {

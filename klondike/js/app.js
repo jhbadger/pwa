@@ -229,7 +229,7 @@ function renderStatus() {
   } else if (state.selected) {
     statusEl.textContent = 'Tap a pile to move the selected card';
   } else {
-    statusEl.textContent = 'Tap a card to select it';
+    statusEl.textContent = 'Tap or drag a card to move it';
   }
 }
 
@@ -286,30 +286,35 @@ function handleStockTap() {
   else playDeal();
 }
 
-function trySelect(info) {
+// The set of pile taps that name a real, movable card — shared by tap
+// selection and by drag start, since both need the same "is this actually
+// pickable" answer for the same {type, col, cardIndex, suit} shape.
+function computeSelectable(info) {
   if (info.type === 'waste') {
-    if (state.game.waste.length === 0) return false;
-    state.selected = { type: 'waste' };
-    state.selectedAt = Date.now();
-    return true;
+    if (state.game.waste.length === 0) return null;
+    return { type: 'waste' };
   }
   if (info.type === 'foundation') {
-    if (state.game.foundations[info.suit].length === 0) return false;
-    state.selected = { type: 'foundation', suit: info.suit };
-    state.selectedAt = Date.now();
-    return true;
+    if (state.game.foundations[info.suit].length === 0) return null;
+    return { type: 'foundation', suit: info.suit };
   }
   if (info.type === 'tableau') {
-    if (info.cardIndex === null) return false;
+    if (info.cardIndex === null) return null;
     const pile = state.game.tableau[info.col];
     const card = pile[info.cardIndex];
-    if (!card || !card.faceUp) return false;
-    if (info.cardIndex < faceUpRunStart(pile)) return false;
-    state.selected = { type: 'tableau', col: info.col, cardIndex: info.cardIndex };
-    state.selectedAt = Date.now();
-    return true;
+    if (!card || !card.faceUp) return null;
+    if (info.cardIndex < faceUpRunStart(pile)) return null;
+    return { type: 'tableau', col: info.col, cardIndex: info.cardIndex };
   }
-  return false;
+  return null;
+}
+
+function trySelect(info) {
+  const candidate = computeSelectable(info);
+  if (!candidate) return false;
+  state.selected = candidate;
+  state.selectedAt = Date.now();
+  return true;
 }
 
 // A move that empties a tableau run reveals the card below it, unless that
@@ -464,15 +469,133 @@ function autoComplete() {
 
 // ---------- input ----------
 
-let pointerDown = null; // { x, y }
+const dragLayerEl = document.getElementById('dragLayer');
+const DRAG_THRESHOLD = 7;
+
+let pointerDown = null; // { x, y, candidate }
+let dragState = null; // { candidate, clones: [{ el, clone }] }
+
+// The DOM elements that visually represent a selectable unit — the single
+// top card for waste/foundation, or a tableau card plus every card fanned
+// above it (a run always moves as a group).
+function candidateElements(candidate) {
+  if (candidate.type === 'waste') {
+    const el = wasteEl.querySelector('.card:last-child');
+    return el ? [el] : [];
+  }
+  if (candidate.type === 'foundation') {
+    const el = foundationEls[candidate.suit].querySelector('.card');
+    return el ? [el] : [];
+  }
+  if (candidate.type === 'tableau') {
+    return Array.from(columnEls[candidate.col].querySelectorAll('.card'))
+      .filter((el) => Number(el.dataset.index) >= candidate.cardIndex);
+  }
+  return [];
+}
+
+// Lifts the real cards out of the flow (hidden, not removed — render()
+// will rebuild them fresh on drop) and floats same-sized clones above
+// everything else so the drag isn't tangled up in each pile's own
+// z-index/stacking context.
+function startDrag(candidate) {
+  const elements = candidateElements(candidate);
+  if (!elements.length) return null;
+  const clones = elements.map((el) => {
+    const rect = el.getBoundingClientRect();
+    const clone = el.cloneNode(true);
+    clone.classList.add('drag-clone');
+    clone.style.left = `${rect.left}px`;
+    clone.style.top = `${rect.top}px`;
+    clone.style.width = `${rect.width}px`;
+    clone.style.height = `${rect.height}px`;
+    clone.style.margin = '0';
+    clone.style.transform = 'scale(1.05)';
+    dragLayerEl.appendChild(clone);
+    el.style.visibility = 'hidden';
+    return { el, clone };
+  });
+  return { candidate, clones };
+}
+
+function updateDrag(dx, dy) {
+  for (const { clone } of dragState.clones) {
+    clone.style.transform = `translate(${dx}px, ${dy}px) scale(1.05)`;
+  }
+}
+
+function endDrag(dropX, dropY) {
+  const { candidate, clones } = dragState;
+  dragState = null;
+
+  const dropEl = document.elementFromPoint(dropX, dropY);
+  const target = dropEl ? resolveClickInfo(dropEl) : null;
+  const result = target ? attemptMove(candidate, target) : { game: null };
+
+  if (result.game) {
+    for (const { clone } of clones) clone.remove();
+    for (const { el } of clones) el.style.visibility = '';
+    commit(result.game, { sound: result.toFoundation ? playFoundation : playPlace, flipped: result.flipped });
+    return;
+  }
+
+  playInvalid();
+  for (const { clone } of clones) {
+    clone.style.transition = 'transform 140ms ease';
+    clone.style.transform = 'scale(1)';
+  }
+  setTimeout(() => {
+    for (const { el, clone } of clones) {
+      clone.remove();
+      el.style.visibility = '';
+    }
+  }, 140);
+}
+
+function cancelDrag() {
+  if (!dragState) return;
+  const { clones } = dragState;
+  dragState = null;
+  for (const { el, clone } of clones) {
+    clone.remove();
+    el.style.visibility = '';
+  }
+}
 
 tableSlotEl.addEventListener('pointerdown', (e) => {
-  pointerDown = { x: e.clientX, y: e.clientY, target: e.target };
+  if (dragState) return;
+  if (state.autoRunning || isWon(state.game)) {
+    pointerDown = null;
+    return;
+  }
+  const info = resolveClickInfo(e.target);
+  const candidate = info ? computeSelectable(info) : null;
+  pointerDown = { x: e.clientX, y: e.clientY, target: e.target, candidate };
+});
+
+tableSlotEl.addEventListener('pointermove', (e) => {
+  if (!pointerDown) return;
+  const dx = e.clientX - pointerDown.x;
+  const dy = e.clientY - pointerDown.y;
+  if (!dragState) {
+    if (!pointerDown.candidate || Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+    dragState = startDrag(pointerDown.candidate);
+    if (!dragState) {
+      pointerDown = null;
+      return;
+    }
+  }
+  updateDrag(dx, dy);
 });
 
 tableSlotEl.addEventListener('pointerup', (e) => {
+  if (dragState) {
+    endDrag(e.clientX, e.clientY);
+    pointerDown = null;
+    return;
+  }
   if (!pointerDown) return;
-  const moved = Math.hypot(e.clientX - pointerDown.x, e.clientY - pointerDown.y) > 8;
+  const moved = Math.hypot(e.clientX - pointerDown.x, e.clientY - pointerDown.y) > DRAG_THRESHOLD;
   pointerDown = null;
   if (moved) return;
   const info = resolveClickInfo(e.target);
@@ -480,6 +603,7 @@ tableSlotEl.addEventListener('pointerup', (e) => {
 });
 
 tableSlotEl.addEventListener('pointercancel', () => {
+  cancelDrag();
   pointerDown = null;
 });
 

@@ -3,7 +3,7 @@
 // on failure is not enough. VERSION is a hash of the precached files' contents; run
 // `node scripts/build.mjs` after editing any of them so the browser detects a real update.
 
-const VERSION = 'c7bb1d136470';
+const VERSION = '7591be0dbc30';
 const CACHE_NAME = `klondike-${VERSION}`;
 
 // Everything the app needs to launch, cold, with no network at all.
