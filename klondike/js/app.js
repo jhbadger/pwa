@@ -61,11 +61,13 @@ const MIN_UP_STEP = 17;
 function computeLayout() {
   const rowRect = tableauRowEl.getBoundingClientRect();
   const totalWidth = rowRect.width;
-  const gap = Math.max(6, Math.min(14, totalWidth * 0.022));
-  // Leave a little breathing room instead of tiling cards fully edge to
-  // edge — smaller cards give a stacked column more headroom before its
-  // fan step has to shrink to fit.
-  const cardW = ((totalWidth - gap * 6) / 7) * 0.92;
+  // Match a classic card-table look (e.g. GNOME Aisleriot): cards take up
+  // roughly 60% of each column's pitch, with visible felt as the gap —
+  // not tiled edge to edge. Smaller cards also give a stacked column far
+  // more headroom before its fan step has to shrink to fit.
+  const pitch = totalWidth / 7;
+  const gap = Math.max(5, Math.min(22, pitch * 0.38));
+  const cardW = pitch - gap;
   const cardH = cardW * 1.4;
 
   appEl.style.setProperty('--card-w', `${cardW}px`);
