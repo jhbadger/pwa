@@ -1,5 +1,5 @@
 import {
-  SUITS, isRed, rankName, suitSymbol, createGame, topOf, faceUpRunStart,
+  SUITS, isRed, rankName, suitSymbol, topOf, faceUpRunStart,
   isWon, canAutoComplete, drawFromStock, moveWasteToFoundation, moveWasteToTableau,
   moveTableauToFoundation, moveTableauToTableau, moveFoundationToTableau,
   findAutoMove, applyAutoMove,
@@ -8,6 +8,8 @@ import {
   playFlip, playDeal, playPlace, playFoundation, playInvalid, playRecycle,
   playUndo, playWin, playAutoMove,
 } from './sound.js';
+import { dealSolvableGame } from './dealer.js';
+import { saveGame, loadGame, clearGame } from './persistence.js';
 
 const appEl = document.querySelector('.app');
 const statusEl = document.getElementById('status');
@@ -42,13 +44,67 @@ const DOUBLE_TAP_MS = 350;
 const savedDrawCount = Number(localStorage.getItem('klondike_drawcount')) === 3 ? 3 : 1;
 
 const state = {
-  game: createGame(savedDrawCount),
+  game: null, // set by boot() before the first render — either restored or freshly dealt
   selected: null, // { type: 'waste' | 'tableau' | 'foundation', col, cardIndex, suit }
   selectedAt: 0,
   history: [],
   moves: 0,
   autoRunning: false,
+  dealing: false,
 };
+
+// ---------- dealing a verified-solvable game ----------
+
+// Runs the search in a worker so shuffling never blocks the main thread. Falls back
+// to dealing on the main thread (still async, just not off-thread) if workers aren't
+// available for some reason.
+let dealWorker = null;
+let dealRequestId = 0;
+function requestSolvableDeal(drawCount) {
+  return new Promise((resolve) => {
+    if (!dealWorker) {
+      try {
+        dealWorker = new Worker(new URL('./solver-worker.js', import.meta.url), { type: 'module' });
+      } catch {
+        dealWorker = null;
+      }
+    }
+    if (!dealWorker) {
+      resolve(dealSolvableGame(drawCount));
+      return;
+    }
+    const requestId = ++dealRequestId;
+    const onMessage = (e) => {
+      if (e.data.requestId !== requestId) return;
+      dealWorker.removeEventListener('message', onMessage);
+      dealWorker.removeEventListener('error', onError);
+      resolve(e.data);
+    };
+    const onError = () => {
+      dealWorker.removeEventListener('message', onMessage);
+      dealWorker.removeEventListener('error', onError);
+      dealWorker = null;
+      resolve(dealSolvableGame(drawCount));
+    };
+    dealWorker.addEventListener('message', onMessage);
+    dealWorker.addEventListener('error', onError);
+    dealWorker.postMessage({ requestId, drawCount });
+  });
+}
+
+async function dealNewSolvableGame(drawCount) {
+  state.dealing = true;
+  btnNewGame.disabled = true;
+  btnUndo.disabled = true;
+  btnDrawMode.disabled = true;
+  btnAuto.disabled = true;
+  statusEl.className = 'status';
+  statusEl.textContent = 'Shuffling a solvable deal…';
+  const result = await requestSolvableDeal(drawCount);
+  state.dealing = false;
+  btnDrawMode.disabled = false;
+  return result.game;
+}
 
 // ---------- layout ----------
 
@@ -238,9 +294,11 @@ function renderStats() {
 }
 
 function renderControls() {
-  btnUndo.disabled = state.history.length === 0 || state.autoRunning;
+  btnUndo.disabled = state.dealing || state.history.length === 0 || state.autoRunning;
   btnDrawMode.querySelector('span').textContent = state.game.drawCount === 3 ? 'Draw 3' : 'Draw 1';
-  btnAuto.disabled = state.autoRunning || !canAutoComplete(state.game);
+  btnDrawMode.disabled = state.dealing;
+  btnAuto.disabled = state.dealing || state.autoRunning || !canAutoComplete(state.game);
+  btnNewGame.disabled = state.dealing;
 }
 
 // ---------- game actions ----------
@@ -266,6 +324,7 @@ function commit(nextGame, { sound, flipped } = {}) {
 
 function checkWin() {
   if (isWon(state.game)) {
+    clearGame();
     setTimeout(() => {
       playWin();
       winMovesEl.textContent = `Solved in ${state.moves} moves.`;
@@ -347,7 +406,7 @@ function tryAutoSendToFoundation(sel) {
 }
 
 function handlePileTap(info) {
-  if (state.autoRunning || isWon(state.game)) return;
+  if (state.dealing || state.autoRunning || isWon(state.game)) return;
   if (info === null) return;
 
   if (info.type === 'stock') {
@@ -418,7 +477,7 @@ function resolveClickInfo(el) {
 }
 
 function undo() {
-  if (state.history.length === 0 || state.autoRunning) return;
+  if (state.dealing || state.history.length === 0 || state.autoRunning) return;
   state.game = state.history.pop();
   state.moves = Math.max(0, state.moves - 1);
   clearSelection();
@@ -426,8 +485,12 @@ function undo() {
   playUndo();
 }
 
-function newGame() {
-  state.game = createGame(state.game.drawCount);
+async function newGame() {
+  if (state.dealing) return;
+  clearGame();
+  const drawCount = state.game.drawCount;
+  const game = await dealNewSolvableGame(drawCount);
+  state.game = game;
   state.history = [];
   state.moves = 0;
   clearSelection();
@@ -436,7 +499,7 @@ function newGame() {
 }
 
 function toggleDrawMode() {
-  if (state.autoRunning) return;
+  if (state.dealing || state.autoRunning) return;
   const next = state.game.drawCount === 3 ? 1 : 3;
   state.game = { ...state.game, drawCount: next };
   localStorage.setItem('klondike_drawcount', String(next));
@@ -444,7 +507,7 @@ function toggleDrawMode() {
 }
 
 function autoComplete() {
-  if (state.autoRunning || !canAutoComplete(state.game)) return;
+  if (state.dealing || state.autoRunning || !canAutoComplete(state.game)) return;
   state.autoRunning = true;
   pushHistory();
   clearSelection();
@@ -564,7 +627,7 @@ function cancelDrag() {
 
 tableSlotEl.addEventListener('pointerdown', (e) => {
   if (dragState) return;
-  if (state.autoRunning || isWon(state.game)) {
+  if (state.dealing || state.autoRunning || isWon(state.game)) {
     pointerDown = null;
     return;
   }
@@ -621,8 +684,28 @@ document.addEventListener('touchstart', (e) => {
 let resizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(render, 80);
+  resizeTimer = setTimeout(() => {
+    if (state.dealing) return;
+    render();
+  }, 80);
 });
+
+// ---------- save / restore on focus loss ----------
+
+function persistIfInProgress() {
+  if (state.dealing || !state.game) return;
+  if (isWon(state.game)) {
+    clearGame();
+    return;
+  }
+  saveGame({ game: state.game, history: state.history, moves: state.moves });
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) persistIfInProgress();
+});
+window.addEventListener('pagehide', persistIfInProgress);
+window.addEventListener('beforeunload', persistIfInProgress);
 
 // ---------- service worker: install-once cache, background updates ----------
 
@@ -675,4 +758,18 @@ function showToast(text, onTap) {
 
 // ---------- boot ----------
 
-render();
+async function boot() {
+  const saved = loadGame();
+  if (saved && !isWon(saved.game)) {
+    state.game = saved.game;
+    state.history = saved.history || [];
+    state.moves = saved.moves || 0;
+    render();
+    return;
+  }
+  clearGame();
+  state.game = await dealNewSolvableGame(savedDrawCount);
+  render();
+}
+
+boot();

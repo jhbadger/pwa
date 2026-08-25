@@ -5,6 +5,21 @@ import {
   drawFromStock, moveWasteToFoundation, moveWasteToTableau, moveTableauToFoundation,
   moveTableauToTableau, moveFoundationToTableau, findAutoMove, applyAutoMove,
 } from '../js/klondike.js';
+import { isSolvable } from '../js/solver.js';
+import { dealSolvableGame } from '../js/dealer.js';
+import { saveGame, loadGame, clearGame } from '../js/persistence.js';
+
+// Node has no localStorage without a runtime flag; persistence.js only touches it
+// inside function bodies, so a minimal in-memory shim installed before those calls
+// run is enough to exercise the real save/load/clear code from here.
+if (typeof globalThis.localStorage === 'undefined') {
+  const store = new Map();
+  globalThis.localStorage = {
+    getItem: (k) => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, String(v)),
+    removeItem: (k) => store.delete(k),
+  };
+}
 
 let failures = 0;
 function check(label, actual, expected) {
@@ -223,6 +238,55 @@ check('wrong rank cannot extend a tableau pile', canAddToTableau({ suit: 'hearts
   stuck.waste = [];
   stuck.tableau = stuck.tableau.map((p) => (p.length ? [{ suit: 'clubs', rank: 8, faceUp: true }] : p));
   check('findAutoMove returns null when nothing can move', findAutoMove(stuck), null);
+}
+
+// ---------- solver ----------
+{
+  // One card from a win: three foundations complete, the fourth's last card
+  // (a king, safe to autoplay once both opposite-color foundations are complete)
+  // sitting face up alone in a tableau column. The search should find it instantly.
+  const near = createGame(1, seeded(20));
+  for (const s of ['hearts', 'diamonds', 'clubs']) {
+    near.foundations[s] = Array.from({ length: 13 }, (_, i) => ({ suit: s, rank: i + 1, faceUp: true }));
+  }
+  near.foundations.spades = Array.from({ length: 12 }, (_, i) => ({ suit: 'spades', rank: i + 1, faceUp: true }));
+  near.tableau = [[{ suit: 'spades', rank: 13, faceUp: true }], [], [], [], [], [], []];
+  near.stock = [];
+  near.waste = [];
+  check('a deal one safe move from winning is solvable', isSolvable(near), true);
+
+  // Nothing face up, nothing in stock/waste: no legal move exists at all.
+  const stuck = createGame(1, seeded(21));
+  stuck.tableau = stuck.tableau.map((p) => p.map((c) => ({ ...c, faceUp: false })));
+  stuck.stock = [];
+  stuck.waste = [];
+  check('a deal with no legal move is not solvable', isSolvable(stuck), false);
+}
+
+// ---------- dealer ----------
+{
+  // Small, fast budgets so the suite stays quick; real play uses larger ones (see
+  // dealer.js defaults). Across a handful of seeds the dealer should still land a
+  // verified-solvable deal, usually on the very first shuffle.
+  const opts = { nodeBudget: 8000, timeBudgetMs: 400, maxAttempts: 10, overallTimeBudgetMs: 4000 };
+  for (const seed of [101, 102, 103]) {
+    const result = dealSolvableGame(1, seeded(seed), opts);
+    check(`dealSolvableGame(seed ${seed}) finds a verified-solvable deal`, result.verified, true);
+    check(`dealSolvableGame(seed ${seed}) deals a full 52-card game`, result.game.tableau.reduce((n, p) => n + p.length, 0) + result.game.stock.length, 52);
+  }
+}
+
+// ---------- persistence ----------
+{
+  clearGame();
+  check('loadGame with nothing saved is null', loadGame(), null);
+  const game = createGame(1, seeded(22));
+  saveGame({ game, history: [], moves: 5 });
+  const loaded = loadGame();
+  check('loadGame round-trips a saved game', loaded && loaded.moves, 5);
+  check('loadGame round-trips tableau column count', loaded.game.tableau.length, 7);
+  clearGame();
+  check('clearGame removes the saved game', loadGame(), null);
 }
 
 if (failures > 0) {
