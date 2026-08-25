@@ -178,10 +178,10 @@ body {
   line-height: 1;
   font-weight: 700;
 }
-.card .corner .rank { font-size: calc(var(--card-w) * 0.22); }
-.card .corner .suit { font-size: calc(var(--card-w) * 0.19); }
-.card .corner.top-left { top: 5%; left: 7%; }
-.card .corner.bottom-right { bottom: 5%; right: 7%; transform: rotate(180deg); }
+.card .corner .rank { font-size: calc(var(--card-w) * 0.26); }
+.card .corner .suit { font-size: calc(var(--card-w) * 0.22); }
+.card .corner.top-left { top: 4%; left: 7%; }
+.card .corner.bottom-right { bottom: 4%; right: 7%; transform: rotate(180deg); }
 
 .card .pip {
   position: absolute;

@@ -52,11 +52,20 @@ const state = {
 
 // ---------- layout ----------
 
+// Below this, a stacked card's rank/suit corner is too thin a sliver to
+// read, so the fan step never shrinks past it even if a very deep column
+// then runs past the nominal available height.
+const MIN_DOWN_STEP = 9;
+const MIN_UP_STEP = 17;
+
 function computeLayout() {
   const rowRect = tableauRowEl.getBoundingClientRect();
   const totalWidth = rowRect.width;
-  const gap = Math.max(3, Math.min(10, totalWidth * 0.012));
-  const cardW = (totalWidth - gap * 6) / 7;
+  const gap = Math.max(6, Math.min(14, totalWidth * 0.022));
+  // Leave a little breathing room instead of tiling cards fully edge to
+  // edge — smaller cards give a stacked column more headroom before its
+  // fan step has to shrink to fit.
+  const cardW = ((totalWidth - gap * 6) / 7) * 0.92;
   const cardH = cardW * 1.4;
 
   appEl.style.setProperty('--card-w', `${cardW}px`);
@@ -69,8 +78,8 @@ function computeLayout() {
   const slotHeight = tableSlotEl.getBoundingClientRect().height;
   const topRowHeight = topRowEl.getBoundingClientRect().height;
   const availableHeight = Math.max(cardH, slotHeight - topRowHeight - 8);
-  const prefDownStep = cardH * 0.14;
-  const prefUpStep = cardH * 0.30;
+  const prefDownStep = Math.max(cardH * 0.16, MIN_DOWN_STEP);
+  const prefUpStep = Math.max(cardH * 0.34, MIN_UP_STEP);
 
   function stepsFor(pile, downStep, upStep) {
     const tops = [0];
@@ -87,15 +96,26 @@ function computeLayout() {
     if (needed > maxNeeded) maxNeeded = needed;
   }
 
+  // Shrink the fan only if there's slack to give up, and never past the
+  // legibility floors above — a very deep column is allowed to run past
+  // the nominal available height rather than crush its cards unreadable.
   let scale = 1;
   if (maxNeeded > availableHeight && maxNeeded > cardH) {
     scale = Math.max(0.15, (availableHeight - cardH) / (maxNeeded - cardH));
   }
 
-  const downStep = prefDownStep * scale;
-  const upStep = prefUpStep * scale;
-  appEl.style.setProperty('--col-h', `${cardH + (maxNeeded - cardH) * scale}px`);
-  return state.game.tableau.map((pile) => stepsFor(pile, downStep, upStep));
+  const downStep = Math.max(prefDownStep * scale, MIN_DOWN_STEP);
+  const upStep = Math.max(prefUpStep * scale, MIN_UP_STEP);
+
+  let colHeight = cardH;
+  const tops = state.game.tableau.map((pile) => {
+    const t = stepsFor(pile, downStep, upStep);
+    const needed = cardH + (t.length ? t[t.length - 1] : 0);
+    if (needed > colHeight) colHeight = needed;
+    return t;
+  });
+  appEl.style.setProperty('--col-h', `${colHeight}px`);
+  return tops;
 }
 
 // ---------- rendering ----------
