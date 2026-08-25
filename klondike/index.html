@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Klondike Solitaire</title>
+<meta name="description" content="Classic Klondike solitaire with sound effects.">
+<meta name="theme-color" content="#0b3d24">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-512.png" sizes="512x512" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Klondike">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="css/style.css">
+
+<script>
+  // Must run during head parse, before any layout, so standalone-only chrome
+  // never flashes on screen before disappearing.
+  (function () {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+    document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
+  })();
+</script>
+
+<script>
+  // Register as early as possible (during parse), not on window.load — waiting for
+  // every subresource means warming the cache last on the slow connection that needs it most.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <h1 class="title">Klondike Solitaire</h1>
+    <p class="status" id="status" aria-live="polite">Tap a card to select it</p>
+  </header>
+
+  <div class="table-slot" id="tableSlot">
+    <div class="top-row" id="topRow">
+      <div class="pile stock" id="stock"></div>
+      <div class="pile waste" id="waste"></div>
+      <div class="spacer"></div>
+      <div class="pile foundation" id="f-spades" data-suit="spades"></div>
+      <div class="pile foundation" id="f-hearts" data-suit="hearts"></div>
+      <div class="pile foundation" id="f-diamonds" data-suit="diamonds"></div>
+      <div class="pile foundation" id="f-clubs" data-suit="clubs"></div>
+    </div>
+    <div class="tableau-row" id="tableauRow"></div>
+  </div>
+
+  <div class="stats" id="stats">Moves: 0</div>
+
+  <footer class="toolbar">
+    <button type="button" class="tbtn" id="btnUndo" aria-label="Undo last move">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+      <span>Undo</span>
+    </button>
+    <button type="button" class="tbtn" id="btnDrawMode" aria-label="Toggle draw one or draw three">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/></svg>
+      <span>Draw 1</span>
+    </button>
+    <button type="button" class="tbtn" id="btnAuto" aria-label="Auto-complete the game" disabled>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>
+      <span>Auto</span>
+    </button>
+    <button type="button" class="tbtn" id="btnNewGame" aria-label="New game">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 13c0-4.42-3.58-8-8-8zm-6 8c0-1.01.25-1.97.7-2.8L5.24 8.74A7.93 7.93 0 004 13c0 4.42 3.58 8 8 8v3l5-4-5-4v3c-3.31 0-6-2.69-6-6z"/></svg>
+      <span>New Game</span>
+    </button>
+  </footer>
+</div>
+
+<div class="win-overlay" id="winOverlay" hidden>
+  <div class="win-card">
+    <h2>You win!</h2>
+    <p id="winMoves"></p>
+    <button type="button" id="btnWinNewGame">New Game</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
