@@ -204,6 +204,7 @@ function render() {
     const type = TYPE_BY_ID[tile.typeId];
     const face = el.querySelector('.glyph');
     if (face.textContent !== type.glyph) face.textContent = type.glyph;
+    face.className = `glyph suit-${type.suit}`;
     el.title = type.name;
     const free = isFree(state.index, tile);
     el.classList.toggle('free', free);

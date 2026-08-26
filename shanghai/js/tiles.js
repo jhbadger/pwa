@@ -46,6 +46,9 @@ const SEASONS = [
   { key: 's4', name: 'Winter', cp: 0x1F029 },
 ];
 
+// `suit` drives the ink color in css/style.css (each traditional suit/dragon
+// gets its own color, the way a real mahjong set does) — it's cosmetic only,
+// matching plays purely on typeId/category above.
 export const TILE_TYPES = [];
 for (const suit of SUITS) {
   for (let n = 1; n <= 9; n++) {
@@ -55,20 +58,29 @@ for (const suit of SUITS) {
       category: 'standard',
       name: `${suit.name} ${n}`,
       count: 4,
+      suit: suit.key,
     });
   }
 }
 for (const w of WINDS) {
-  TILE_TYPES.push({ id: w.key, glyph: String.fromCodePoint(w.cp), category: 'standard', name: w.name, count: 4 });
+  TILE_TYPES.push({
+    id: w.key, glyph: String.fromCodePoint(w.cp), category: 'standard', name: w.name, count: 4, suit: 'wind',
+  });
 }
 for (const d of DRAGONS) {
-  TILE_TYPES.push({ id: d.key, glyph: String.fromCodePoint(d.cp), category: 'standard', name: d.name, count: 4 });
+  TILE_TYPES.push({
+    id: d.key, glyph: String.fromCodePoint(d.cp), category: 'standard', name: d.name, count: 4, suit: d.key,
+  });
 }
 for (const f of FLOWERS) {
-  TILE_TYPES.push({ id: f.key, glyph: String.fromCodePoint(f.cp), category: 'flower', name: f.name, count: 1 });
+  TILE_TYPES.push({
+    id: f.key, glyph: String.fromCodePoint(f.cp), category: 'flower', name: f.name, count: 1, suit: 'flower',
+  });
 }
 for (const s of SEASONS) {
-  TILE_TYPES.push({ id: s.key, glyph: String.fromCodePoint(s.cp), category: 'season', name: s.name, count: 1 });
+  TILE_TYPES.push({
+    id: s.key, glyph: String.fromCodePoint(s.cp), category: 'season', name: s.name, count: 1, suit: 'season',
+  });
 }
 
 export const TYPE_BY_ID = Object.fromEntries(TILE_TYPES.map((t) => [t.id, t]));

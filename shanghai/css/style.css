@@ -6,11 +6,24 @@
   --ink-dim: #cda99f;
   --accent: #e3b23c;
   --accent-ink: #2a1a0c;
-  --tile-face: #f7f3ea;
-  --tile-border: #c9bda6;
+  --tile-face-top: #fffaf0;
+  --tile-face-bot: #e8d8a9;
+  --tile-edge: #8a6a35;
   --win: #58c46a;
   --warn: #e6c25a;
   --border: #5c1c1f;
+  /* Traditional per-suit ink colors — a real mahjong set's numerals/dragons
+     are colored, not uniformly black, so this is what actually reads as
+     "colorful" from a normal viewing distance. */
+  --ink-wan: #b5202a;
+  --ink-bam: #1f7a37;
+  --ink-dot: #1f5fa8;
+  --ink-wind: #1c2b6b;
+  --ink-dr: #c8102e;
+  --ink-dg: #1f7a37;
+  --ink-dw: #2f6fa0;
+  --ink-flower: #c8447a;
+  --ink-season: #b5820a;
   --safe-top: max(env(safe-area-inset-top), 12px);
   --safe-bottom: max(env(safe-area-inset-bottom), 12px);
   --safe-left: max(env(safe-area-inset-left), 10px);
@@ -89,14 +102,23 @@ body {
   flex: 0 0 auto;
 }
 
+/* A tile reads as a carved ivory block: a glossy top-left highlight, a
+   warm shadowed bevel on the bottom-right, and a hard-edged "riser" under
+   that (the flat brown line before the soft drop shadow) standing in for
+   the block's own side face — same trick as a skeuomorphic button, just
+   tuned to look like stone/bone rather than plastic. */
 .tile {
   position: absolute;
   width: 44px;
   height: 60px;
-  border-radius: 5px;
-  background: var(--tile-face);
-  border: 1px solid var(--tile-border);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25), 0 3px 6px rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+  background: linear-gradient(155deg, var(--tile-face-top) 0%, var(--tile-face-top) 45%, var(--tile-face-bot) 100%);
+  border: 1px solid var(--tile-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset -1px -2px 3px rgba(90, 65, 20, 0.35),
+    0 3px 0 rgba(60, 42, 16, 0.55),
+    0 5px 8px rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,11 +126,25 @@ body {
 }
 
 .tile .glyph {
-  font-size: 26px;
+  font-size: 27px;
   line-height: 1;
   color: #201812;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
   pointer-events: none;
 }
+
+/* Traditional mahjong ink colors per suit/dragon — falls back to the plain
+   dark ink above for anything platform emoji already renders in full color
+   (text-color has no effect there, so this only helps where it can). */
+.glyph.suit-wan { color: var(--ink-wan); }
+.glyph.suit-bam { color: var(--ink-bam); }
+.glyph.suit-dot { color: var(--ink-dot); }
+.glyph.suit-wind { color: var(--ink-wind); }
+.glyph.suit-dr { color: var(--ink-dr); }
+.glyph.suit-dg { color: var(--ink-dg); }
+.glyph.suit-dw { color: var(--ink-dw); }
+.glyph.suit-flower { color: var(--ink-flower); }
+.glyph.suit-season { color: var(--ink-season); }
 
 .tile.free {
   cursor: pointer;
@@ -116,12 +152,21 @@ body {
 
 .tile.blocked {
   filter: saturate(0.35) brightness(0.72);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset -1px -2px 3px rgba(60, 45, 20, 0.35),
+    0 2px 0 rgba(40, 28, 10, 0.5),
+    0 3px 5px rgba(0, 0, 0, 0.35);
 }
 
 .tile.selected {
   transform: translateY(-6px);
-  box-shadow: 0 0 0 3px var(--accent), 0 6px 14px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset -1px -2px 3px rgba(90, 65, 20, 0.35),
+    0 0 0 3px var(--accent),
+    0 3px 0 rgba(60, 42, 16, 0.55),
+    0 8px 16px rgba(0, 0, 0, 0.5);
 }
 
 .tile.hint {
@@ -129,8 +174,22 @@ body {
 }
 
 @keyframes hint-pulse {
-  from { box-shadow: 0 0 0 2px var(--warn), 0 3px 6px rgba(0, 0, 0, 0.35); }
-  to   { box-shadow: 0 0 0 5px var(--warn), 0 3px 6px rgba(0, 0, 0, 0.35); }
+  from {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset -1px -2px 3px rgba(90, 65, 20, 0.35),
+      0 0 0 2px var(--warn),
+      0 3px 0 rgba(60, 42, 16, 0.55),
+      0 4px 8px rgba(0, 0, 0, 0.4);
+  }
+  to {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset -1px -2px 3px rgba(90, 65, 20, 0.35),
+      0 0 0 5px var(--warn),
+      0 3px 0 rgba(60, 42, 16, 0.55),
+      0 4px 8px rgba(0, 0, 0, 0.4);
+  }
 }
 
 .tile.removed {

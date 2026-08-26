@@ -4,7 +4,7 @@
 // precached files' contents; run `node scripts/build.mjs` after editing any of
 // them so the browser detects a real update.
 
-const VERSION = 'ca79de60a637';
+const VERSION = 'f5caaad0b2a9';
 const CACHE_NAME = `shanghai-${VERSION}`;
 
 // Everything the app needs to launch, cold, with no network at all.
