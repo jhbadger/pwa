@@ -112,6 +112,14 @@ export function playFumble() {
   sweep(180, 70, t0 + 0.1, 0.35, { type: 'sawtooth', gain: 0.16 });
 }
 
+// A short pluck marking a hold toggle — rising when a die is held, falling
+// when it's released, pitched like the die itself.
+export function playHold(sides, held) {
+  const ctx = ensureAudio();
+  const freq = pitchForSides(sides) + 500;
+  tone(held ? freq : freq * 0.72, ctx.currentTime, 0.08, { type: 'sine', gain: 0.16 });
+}
+
 export function playClear() {
   const ctx = ensureAudio();
   sweep(600, 120, ctx.currentTime, 0.2, { type: 'sine', gain: 0.18 });

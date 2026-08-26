@@ -174,9 +174,16 @@ body {
   position: relative;
   width: 58px;
   height: 58px;
+  margin: 0;
+  padding: 0;
   border-radius: 14px;
   background: var(--die-face);
   border: 1px solid var(--border);
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,6 +231,26 @@ body {
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(226, 86, 77, 0.35);
 }
 .die-tile.min .die-value { color: var(--lose); }
+
+/* Held wins visually over max/min — it's a deliberate, persistent choice
+   rather than a one-off roll outcome. */
+.die-tile.held {
+  border-color: var(--accent);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(139, 108, 240, 0.5);
+}
+.die-tile.held .die-value { color: var(--accent); }
+.die-tile.held::after {
+  content: 'HELD';
+  position: absolute;
+  bottom: 3px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.42rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
 
 /* ---------- sum ---------- */
 

@@ -51,15 +51,40 @@ export function totalDiceCount(pool) {
 }
 
 // Flattens the pool into individual die rolls — one entry per physical die,
-// in pool order (ascending sides, then roll order within a type).
-export function rollPool(pool, rng = Math.random) {
+// in pool order (ascending sides, then roll order within a type). `heldRolls`
+// (entries from a previous rollPool() result, e.g. ones the player marked
+// held) are reused as-is instead of re-rolled, up to how many of that type
+// the pool currently has — extra pool slots of that type still get a fresh
+// roll, and held entries whose type no longer appears in the pool are
+// dropped. This lets a hold survive the pool being edited between rolls.
+export function rollPool(pool, rng = Math.random, heldRolls = []) {
+  const heldBySides = new Map();
+  for (const r of heldRolls) {
+    if (!heldBySides.has(r.sides)) heldBySides.set(r.sides, []);
+    heldBySides.get(r.sides).push(r);
+  }
   const rolls = [];
   for (const { sides, count } of pool) {
+    const held = heldBySides.get(sides) || [];
     for (let i = 0; i < count; i++) {
-      rolls.push({ sides, value: rollDie(sides, rng) });
+      rolls.push(i < held.length ? held[i] : { sides, value: rollDie(sides, rng) });
     }
   }
   return rolls;
+}
+
+// How many dice in `pool` would still get a fresh roll from
+// rollPool(pool, rng, heldRolls) — i.e. the pool's dice not covered by a held
+// entry of the same type. Used to keep the Roll button's count honest once
+// some dice are held.
+export function countUnheld(pool, heldRolls) {
+  const heldCountBySides = new Map();
+  for (const r of heldRolls) heldCountBySides.set(r.sides, (heldCountBySides.get(r.sides) || 0) + 1);
+  let unheld = 0;
+  for (const { sides, count } of pool) {
+    unheld += Math.max(count - (heldCountBySides.get(sides) || 0), 0);
+  }
+  return unheld;
 }
 
 export function sumRolls(rolls) {

@@ -1,7 +1,7 @@
 // Quick correctness check for the dice pool logic — not shipped to the app, dev-only.
 import {
   DIE_TYPES, MAX_PER_TYPE, rollDie, addDie, removeDie, removeAllOfType, clearPool,
-  totalDiceCount, rollPool, sumRolls, isMaxRoll, isMinRoll,
+  totalDiceCount, rollPool, countUnheld, sumRolls, isMaxRoll, isMinRoll,
 } from '../js/dice.js';
 
 let failures = 0;
@@ -100,6 +100,27 @@ check('DIE_TYPES lists the seven standard polyhedral dice', DIE_TYPES, [4, 6, 8,
   check('isMinRoll is false for a non-1 roll', isMinRoll({ sides: 20, value: 2 }), false);
 
   check('rollPool on an empty pool returns no rolls', rollPool([], seeded(3)), []);
+}
+
+// ---------- holding dice between rolls ----------
+{
+  const pool = [{ sides: 6, count: 3 }, { sides: 20, count: 1 }];
+  const held = [{ sides: 6, value: 4, held: true }];
+  const rolls = rollPool(pool, seeded(4), held);
+  check('rollPool keeps a held die\'s exact entry', rolls[0], { sides: 6, value: 4, held: true });
+  check('rollPool still rolls the rest of that type fresh', rolls.length, 4);
+  check('rollPool leaves untouched types alone', rolls[3].sides, 20);
+
+  check('countUnheld subtracts held dice of the same type', countUnheld(pool, held), 3);
+  check('countUnheld never goes negative for a shrunken pool', countUnheld([{ sides: 6, count: 0 }], held), 0);
+  check('countUnheld ignores held dice of a type no longer in the pool', countUnheld([{ sides: 20, count: 1 }], held), 1);
+  check('countUnheld with nothing held equals the full pool', countUnheld(pool, []), 4);
+
+  const allHeld = [{ sides: 6, value: 2, held: true }, { sides: 6, value: 5, held: true }, { sides: 6, value: 1, held: true }];
+  const shrunkPool = [{ sides: 6, count: 2 }];
+  const rerolled = rollPool(shrunkPool, seeded(5), allHeld);
+  check('rollPool drops held entries beyond the pool\'s current count for that type', rerolled.length, 2);
+  check('rollPool keeps the first held entries when the type shrinks', rerolled, [allHeld[0], allHeld[1]]);
 }
 
 if (failures > 0) {

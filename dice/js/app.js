@@ -1,9 +1,9 @@
 import {
   DIE_TYPES, addDie, removeDie, removeAllOfType, clearPool, totalDiceCount,
-  rollPool, sumRolls, isMaxRoll, isMinRoll,
+  rollPool, countUnheld, sumRolls, isMaxRoll, isMinRoll,
 } from './dice.js';
 import {
-  playAddDie, playRemoveDie, playRollStart, playDieLand, playCritical, playFumble, playClear,
+  playAddDie, playRemoveDie, playRollStart, playDieLand, playCritical, playFumble, playClear, playHold,
 } from './sound.js';
 
 const statusEl = document.getElementById('status');
@@ -76,12 +76,17 @@ function renderPool() {
     minusBtn.addEventListener('click', () => {
       if (state.rolling) return;
       state.pool = removeDie(state.pool, sides);
+      // Only clear holds once this type is fully gone from the pool — a
+      // partial decrement still leaves enough slots for rollPool()'s own
+      // per-type matching to keep whichever holds still fit.
+      if (!state.pool.some((e) => e.sides === sides)) clearHeldForSides(sides);
       playRemoveDie(sides);
       render();
     });
     removeBtn.addEventListener('click', () => {
       if (state.rolling) return;
       state.pool = removeAllOfType(state.pool, sides);
+      clearHeldForSides(sides);
       playRemoveDie(sides);
       render();
     });
@@ -91,7 +96,9 @@ function renderPool() {
 
 // Builds the static (post-roll) results grid from state.lastRolls. While a
 // roll is animating, the tiles are owned and updated directly by roll() —
-// this just bails out so it doesn't fight that in-flight animation.
+// this just bails out so it doesn't fight that in-flight animation. Each
+// tile doubles as a hold toggle: tapping a landed die keeps its value out of
+// the next roll until tapped again, cleared, or its die is removed.
 function renderResults() {
   if (state.rolling) return;
   resultsEl.innerHTML = '';
@@ -100,9 +107,17 @@ function renderResults() {
     return;
   }
   for (const r of state.lastRolls) {
-    const tile = document.createElement('div');
-    tile.className = `die-tile ${isMaxRoll(r) ? 'max' : ''} ${isMinRoll(r) ? 'min' : ''}`.trim();
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = `die-tile ${isMaxRoll(r) ? 'max' : ''} ${isMinRoll(r) ? 'min' : ''} ${r.held ? 'held' : ''}`.trim();
+    tile.setAttribute('aria-pressed', r.held ? 'true' : 'false');
+    tile.setAttribute('aria-label', `d${r.sides} rolled ${r.value}, tap to ${r.held ? 'release' : 'hold'}`);
     tile.innerHTML = `<span class="die-label">d${r.sides}</span><span class="die-value">${r.value}</span>`;
+    tile.addEventListener('click', () => {
+      r.held = !r.held;
+      playHold(r.sides, r.held);
+      render();
+    });
     resultsEl.appendChild(tile);
   }
   sumEl.textContent = `Sum: ${sumRolls(state.lastRolls)}`;
@@ -112,11 +127,27 @@ function renderStats() {
   statsEl.textContent = `Rolls: ${state.rollCount}`;
 }
 
+function heldRollsOf(rolls) {
+  return rolls ? rolls.filter((r) => r.held) : [];
+}
+
+// Releases any hold on dice of `sides` — used once that type is fully
+// deleted from the pool, so a later re-add of the same type starts fresh
+// instead of silently reusing the old held value.
+function clearHeldForSides(sides) {
+  if (!state.lastRolls) return;
+  for (const r of state.lastRolls) {
+    if (r.sides === sides) r.held = false;
+  }
+}
+
 function renderStatus() {
+  const heldCount = heldRollsOf(state.lastRolls).length;
   if (state.rolling) {
     statusEl.textContent = 'Rolling…';
   } else if (state.lastRolls) {
-    statusEl.textContent = `Rolled ${state.lastRolls.length} ${state.lastRolls.length === 1 ? 'die' : 'dice'}`;
+    statusEl.textContent = `Rolled ${state.lastRolls.length} ${state.lastRolls.length === 1 ? 'die' : 'dice'}`
+      + (heldCount > 0 ? ` — tap a die to hold it, ${heldCount} held` : ' — tap a die to hold it');
   } else if (state.pool.length === 0) {
     statusEl.textContent = 'Tap a die below to add it to your roll';
   } else {
@@ -126,8 +157,14 @@ function renderStatus() {
 
 function renderControls() {
   const count = totalDiceCount(state.pool);
+  const held = heldRollsOf(state.lastRolls);
+  const toRoll = held.length > 0 ? countUnheld(state.pool, held) : count;
   btnRoll.disabled = state.rolling || count === 0;
-  btnRoll.textContent = state.rolling ? 'Rolling…' : count > 0 ? `Roll ${count} ${count === 1 ? 'die' : 'dice'}` : 'Roll';
+  btnRoll.textContent = state.rolling
+    ? 'Rolling…'
+    : count === 0
+      ? 'Roll'
+      : `Roll ${toRoll} ${toRoll === 1 ? 'die' : 'dice'}${held.length > 0 ? ` (${held.length} held)` : ''}`;
   btnClear.disabled = state.rolling || (state.pool.length === 0 && !state.lastRolls);
   for (const btn of pickerButtons) btn.disabled = state.rolling;
 }
@@ -167,24 +204,29 @@ function animateTile(tile, sides, finalValue, duration, onLand) {
 
 function roll() {
   if (state.rolling || totalDiceCount(state.pool) === 0) return;
-  const rolls = rollPool(state.pool);
+  const held = heldRollsOf(state.lastRolls);
+  const rolls = rollPool(state.pool, Math.random, held);
 
   state.rolling = true;
   state.lastRolls = null;
   render();
-  playRollStart(rolls.length);
+  playRollStart(countUnheld(state.pool, held));
 
   resultsEl.innerHTML = '';
-  const tiles = rolls.map(({ sides }) => {
+  const tiles = rolls.map((r) => {
     const tile = document.createElement('div');
-    tile.className = 'die-tile rolling';
-    tile.innerHTML = `<span class="die-label">d${sides}</span><span class="die-value">${sides}</span>`;
+    tile.className = r.held ? 'die-tile held landed' : 'die-tile rolling';
+    tile.innerHTML = `<span class="die-label">d${r.sides}</span><span class="die-value">${r.held ? r.value : r.sides}</span>`;
     resultsEl.appendChild(tile);
     return tile;
   });
 
   let landed = 0;
   rolls.forEach((r, i) => {
+    if (r.held) {
+      landed++;
+      return;
+    }
     const duration = ROLL_BASE_MS + Math.random() * ROLL_STAGGER_MS + i * 12;
     animateTile(tiles[i], r.sides, r.value, duration, () => {
       playDieLand(r.sides);
@@ -194,6 +236,7 @@ function roll() {
       if (landed === rolls.length) finishRoll(rolls);
     });
   });
+  if (landed === rolls.length) finishRoll(rolls);
 }
 
 function finishRoll(rolls) {
