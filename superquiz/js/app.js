@@ -71,6 +71,7 @@ function pickSet() {
 }
 
 function renderCategorySelect() {
+  if (!categorySelectEl) return;
   categorySelectEl.innerHTML = '';
   const allOpt = document.createElement('option');
   allOpt.value = 'all';
@@ -151,11 +152,13 @@ quizListEl.addEventListener('click', (e) => {
   btn.setAttribute('aria-expanded', String(revealed));
 });
 
-categorySelectEl.addEventListener('change', () => {
-  state.category = categorySelectEl.value;
-  localStorage.setItem('superquiz_category', state.category);
-  newQuiz();
-});
+if (categorySelectEl) {
+  categorySelectEl.addEventListener('change', () => {
+    state.category = categorySelectEl.value;
+    localStorage.setItem('superquiz_category', state.category);
+    newQuiz();
+  });
+}
 
 btnNewQuiz.addEventListener('click', newQuiz);
 

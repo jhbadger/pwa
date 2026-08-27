@@ -3,7 +3,7 @@
 // on failure is not enough. VERSION is a hash of the precached files' contents; run
 // `node scripts/build.mjs` after editing any of them so the browser detects a real update.
 
-const VERSION = 'a486dd5f5a90';
+const VERSION = '5e6dbe2675ee';
 const CACHE_NAME = `superquiz-${VERSION}`;
 
 // Everything the app needs to launch, cold, with no network at all.
