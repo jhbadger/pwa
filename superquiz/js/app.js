@@ -107,7 +107,7 @@ function renderDifficultyRow() {
 function renderQuiz() {
   const { set } = state;
   const levelLabel = DIFFICULTIES.find((d) => d.key === set.d).label;
-  categoryEl.textContent = `${titleCase(set.c)} — ${levelLabel} Level`;
+  categoryEl.textContent = `${titleCase(set.l ?? set.c)} — ${levelLabel} Level`;
 
   quizListEl.innerHTML = '';
   set.qa.forEach(([question, answer], i) => {
