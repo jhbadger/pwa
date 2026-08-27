@@ -1,6 +1,7 @@
 import { QUIZ_SETS } from './questions.js';
 
 const difficultyRowEl = document.getElementById('difficultyRow');
+const categorySelectEl = document.getElementById('categorySelect');
 const categoryEl = document.getElementById('category');
 const quizListEl = document.getElementById('quizList');
 const contentEl = document.getElementById('content');
@@ -16,6 +17,7 @@ const DIFFICULTIES = [
 
 const state = {
   difficulty: localStorage.getItem('superquiz_difficulty') || 'mixed',
+  category: localStorage.getItem('superquiz_category') || 'all',
   set: null, // the currently displayed quiz set: { c, d, qa }
 };
 
@@ -40,18 +42,47 @@ function titleCase(str) {
   });
 }
 
-function poolFor(difficulty) {
-  return difficulty === 'mixed' ? QUIZ_SETS : QUIZ_SETS.filter((s) => s.d === difficulty);
+const CATEGORIES = [...new Set(QUIZ_SETS.map((s) => s.c))]
+  .sort((a, b) => titleCase(a).localeCompare(titleCase(b)));
+
+if (state.category !== 'all' && !CATEGORIES.includes(state.category)) {
+  state.category = 'all';
 }
 
-function pickSet(difficulty) {
-  const pool = poolFor(difficulty);
+function poolFor(difficulty, category) {
+  return QUIZ_SETS.filter((s) =>
+    (difficulty === 'mixed' || s.d === difficulty)
+    && (category === 'all' || s.c === category));
+}
+
+function pickSet() {
+  // A category can be tied to a single difficulty (a few of the book's named
+  // sets); fall back to ignoring difficulty rather than coming up empty.
+  let pool = poolFor(state.difficulty, state.category);
+  if (pool.length === 0) {
+    pool = poolFor('mixed', state.category);
+  }
   let candidates = pool;
   if (pool.length > 1 && state.set) {
     const filtered = pool.filter((s) => s !== state.set);
     if (filtered.length > 0) candidates = filtered;
   }
   return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function renderCategorySelect() {
+  categorySelectEl.innerHTML = '';
+  const allOpt = document.createElement('option');
+  allOpt.value = 'all';
+  allOpt.textContent = 'All Categories';
+  categorySelectEl.appendChild(allOpt);
+  for (const c of CATEGORIES) {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = titleCase(c);
+    categorySelectEl.appendChild(opt);
+  }
+  categorySelectEl.value = state.category;
 }
 
 function renderDifficultyRow() {
@@ -108,7 +139,7 @@ function renderQuiz() {
 }
 
 function newQuiz() {
-  state.set = pickSet(state.difficulty);
+  state.set = pickSet();
   renderQuiz();
 }
 
@@ -118,6 +149,12 @@ quizListEl.addEventListener('click', (e) => {
   const li = btn.closest('.qcard');
   const revealed = li.classList.toggle('revealed');
   btn.setAttribute('aria-expanded', String(revealed));
+});
+
+categorySelectEl.addEventListener('change', () => {
+  state.category = categorySelectEl.value;
+  localStorage.setItem('superquiz_category', state.category);
+  newQuiz();
 });
 
 btnNewQuiz.addEventListener('click', newQuiz);
@@ -174,4 +211,5 @@ function showToast(text, onTap) {
 // ---------- boot ----------
 
 renderDifficultyRow();
+renderCategorySelect();
 newQuiz();

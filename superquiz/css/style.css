@@ -80,6 +80,22 @@ body {
   color: var(--accent-ink);
 }
 
+.category-select {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: 8px;
+  max-width: 100%;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 7px 28px 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%239aa2b4" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 8px center / 16px 16px;
+  color: var(--ink-dim);
+}
+.category-select:active { background-color: var(--panel-2); }
+
 /* ---------- content ---------- */
 
 .content {
