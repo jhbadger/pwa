@@ -1,0 +1,184 @@
+:root {
+  --bg: #0a0a0f;
+  --panel: #13141a;
+  --ink: #e8eaf0;
+  --ink-dim: #7a7f90;
+  --accent: #33ff66;
+  --accent2: #ff3333;
+  --border: #2a2d38;
+  --safe-top: max(env(safe-area-inset-top), 8px);
+  --safe-bottom: max(env(safe-area-inset-bottom), 8px);
+  --safe-left: max(env(safe-area-inset-left), 8px);
+  --safe-right: max(env(safe-area-inset-right), 8px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+
+header h1 {
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+#screen-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+#screen {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 1px solid #1a3a1a;
+  box-shadow: 0 0 20px rgba(51,255,102,0.15);
+  background: #000;
+}
+
+/* ── Overlay ── */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 100;
+  padding: 20px;
+}
+
+.logo-text {
+  font-size: clamp(20px, 6vw, 36px);
+  letter-spacing: 6px;
+  color: var(--accent);
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(51,255,102,0.5);
+  animation: flicker 3s infinite;
+}
+
+.sub-text {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+
+#btn-play {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 4px;
+  padding: 12px 32px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+#btn-play:hover, #btn-play:active {
+  background: rgba(51,255,102,0.1);
+  box-shadow: 0 0 12px rgba(51,255,102,0.3);
+}
+
+.help-text {
+  font-size: 10px;
+  color: var(--ink-dim);
+  text-align: center;
+  letter-spacing: 1px;
+  line-height: 1.8;
+}
+
+#error-msg {
+  display: none;
+  color: var(--accent2);
+  font-size: 11px;
+  text-align: center;
+  max-width: 280px;
+}
+
+/* ── Touch Controls ── */
+#controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0 2px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ctrl-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ctrl-btn {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--ink-dim);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  transition: background 0.1s, border-color 0.1s;
+}
+.ctrl-btn:active, .ctrl-btn.pressed {
+  background: rgba(51,255,102,0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-arrow { width: 44px; height: 44px; font-size: 18px; }
+.btn-action { width: 52px; height: 44px; }
+.btn-small  { width: 44px; height: 36px; font-size: 9px; }
+
+@keyframes flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96% { opacity: 0.7; }
+  97% { opacity: 1; }
+  98% { opacity: 0.5; }
+  99% { opacity: 1; }
+}
+
+/* Hide controls on wide screens with keyboard */
+@media (min-width: 900px) and (hover: hover) {
+  #controls { display: none; }
+}
