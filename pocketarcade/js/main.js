@@ -5,7 +5,7 @@ const audio = new SIAudio();
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d', { alpha: false });
-const W = 256, H = 224;
+const W = 224, H = 256;
 canvas.width = W; canvas.height = H;
 
 const imgData = ctx.createImageData(W, H);

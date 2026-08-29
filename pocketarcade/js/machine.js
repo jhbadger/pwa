@@ -104,17 +104,17 @@ class SpaceInvaders {
     return this.cpu.mem.subarray(0x2400, 0x4000);
   }
 
-  // Render VRAM to ImageData (256x224, landscape)
-  // VRAM col = screen Y, VRAM row = screen X
+  // Render VRAM to ImageData (224x256, portrait — the arcade's monitor was vertical)
+  // VRAM col = screen X, VRAM row = (H-1 - screen Y)
   render(imageData) {
     const vram = this.vram;
     const data = imageData.data;
-    const W = 256, H = 224;
+    const W = 224, H = 256;
     for (let cy = 0; cy < H; cy++) {
-      const col = cy;           // VRAM column = screen Y
-      const base = col << 5;   // col * 32
+      const row = (H - 1) - cy;   // VRAM row = flipped screen Y
       for (let cx = 0; cx < W; cx++) {
-        const row = cx;         // VRAM row = screen X
+        const col = cx;           // VRAM column = screen X
+        const base = col << 5;   // col * 32
         const lit = (vram[base | (row >> 3)] >> (row & 7)) & 1;
         const off = (cy * W + cx) << 2;
         if (lit) {
