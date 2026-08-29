@@ -182,3 +182,36 @@ header h1 {
 @media (min-width: 900px) and (hover: hover) {
   #controls { display: none; }
 }
+
+/* ── Rotate prompt (touch devices held in portrait) ── */
+#rotate-prompt {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 200;
+  padding: 20px;
+  text-align: center;
+}
+
+.rotate-icon {
+  font-size: 48px;
+  color: var(--accent);
+  animation: flicker 3s infinite;
+}
+
+.rotate-text {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+
+@media (orientation: portrait) and (hover: none) and (pointer: coarse) {
+  header, #screen-wrap, #controls, #overlay { display: none; }
+  #rotate-prompt { display: flex; }
+}
