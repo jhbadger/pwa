@@ -24,22 +24,12 @@
     document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
   })();
   (function () {
-    // Picks which way to rotate the page for the landscape-hold CSS (see
-    // style.css) so it comes out right-side-up regardless of which edge of
-    // the phone the user rotated up.
-    function updateLandscapeFlip() {
-      var flip = false;
-      if (screen.orientation && screen.orientation.type) {
-        flip = screen.orientation.type === 'landscape-secondary';
-      } else if (typeof window.orientation === 'number') {
-        flip = window.orientation === -90;
-      }
-      document.documentElement.classList.toggle('landscape-flip', flip);
-    }
-    window.addEventListener('orientationchange', updateLandscapeFlip);
-    window.addEventListener('resize', updateLandscapeFlip);
-    if (screen.orientation) screen.orientation.addEventListener('change', updateLandscapeFlip);
-    updateLandscapeFlip();
+    // Which way the landscape-hold CSS (see style.css) should rotate the page
+    // varies by device/browser and the orientation APIs report it
+    // inconsistently, so rather than guess, remember whichever way this
+    // device's user last picked with the on-screen flip button.
+    var KEY = 'pa-landscape-flip';
+    document.documentElement.classList.toggle('landscape-flip', localStorage.getItem(KEY) === '1');
   })();
 </script>
 </head>
@@ -48,6 +38,8 @@
 <header>
   <h1>Space Invaders</h1>
 </header>
+
+<button id="btn-flip" aria-label="Flip screen orientation">&#8635;</button>
 
 <div id="screen-wrap">
   <canvas id="screen"></canvas>

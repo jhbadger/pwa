@@ -204,4 +204,31 @@ header h1 {
     left: 100%;
     transform: rotate(90deg);
   }
+
+  /* Manual override: which physical direction is "right" varies by device,
+     so let the player flip it and remember their pick (see main.js). */
+  #btn-flip {
+    display: flex;
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    z-index: 200;
+  }
 }
+
+#btn-flip {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--ink-dim);
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+#btn-flip:active { color: var(--accent); border-color: var(--accent); }

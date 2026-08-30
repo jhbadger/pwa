@@ -124,6 +124,14 @@ function pollGamepad() {
   }
 }
 
+// ── Landscape Flip Button ───────────────────────────────────────────────────
+
+document.getElementById('btn-flip').addEventListener('click', () => {
+  const flip = !document.documentElement.classList.contains('landscape-flip');
+  document.documentElement.classList.toggle('landscape-flip', flip);
+  localStorage.setItem('pa-landscape-flip', flip ? '1' : '0');
+});
+
 // ── Start Button ────────────────────────────────────────────────────────────
 
 document.getElementById('btn-play').addEventListener('click', start);
