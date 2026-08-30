@@ -16,6 +16,7 @@ let frameId = null;
 
 function loop(ts) {
   frameId = requestAnimationFrame(loop);
+  pollGamepad();
   if (!running) return;
   machine.runFrame();
   machine.render(imgData);
@@ -89,6 +90,39 @@ setupButton('btn-right', 1, 6);
 setupButton('btn-fire',  1, 4);
 setupButton('btn-coin',  1, 0);
 setupButton('btn-start', 1, 2);
+
+// ── Gamepad Input ────────────────────────────────────────────────────────────
+
+// Standard gamepad mapping: D-pad/left stick to move, button 0 (A/X) to fire,
+// start button to insert coin and begin the game (also dismisses the overlay).
+const padState = { left: false, right: false, fire: false, start: false, coin: false };
+const AXIS_THRESHOLD = 0.5;
+
+function pollGamepad() {
+  const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+  let gp = null;
+  for (const p of pads) { if (p) { gp = p; break; } }
+  if (!gp) return;
+
+  const dpadLeft  = !!(gp.buttons[14] && gp.buttons[14].pressed);
+  const dpadRight = !!(gp.buttons[15] && gp.buttons[15].pressed);
+  const axisX = gp.axes[0] || 0;
+  const left  = dpadLeft  || axisX < -AXIS_THRESHOLD;
+  const right = dpadRight || axisX > AXIS_THRESHOLD;
+  const fire  = !!(gp.buttons[0] && gp.buttons[0].pressed);
+  const coin    = !!(gp.buttons[8] && gp.buttons[8].pressed);
+  const startBtn = !!(gp.buttons[9] && gp.buttons[9].pressed);
+
+  if (left !== padState.left)   { machine.setPort1(5, left);  padState.left = left; }
+  if (right !== padState.right) { machine.setPort1(6, right); padState.right = right; }
+  if (fire !== padState.fire)   { machine.setPort1(4, fire);  padState.fire = fire; if (fire) audio.resume(); }
+  if (coin !== padState.coin)   { machine.setPort1(0, coin);  padState.coin = coin; }
+  if (startBtn !== padState.start) {
+    machine.setPort1(2, startBtn);
+    padState.start = startBtn;
+    if (startBtn && !running) start();
+  }
+}
 
 // ── Start Button ────────────────────────────────────────────────────────────
 
