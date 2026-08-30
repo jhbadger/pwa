@@ -210,10 +210,10 @@ header h1 {
   #btn-flip {
     display: flex;
     position: fixed;
-    top: 8px;
-    right: 8px;
-    width: 32px;
-    height: 32px;
+    top: 10px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
     z-index: 200;
   }
 }
@@ -222,13 +222,14 @@ header h1 {
   display: none;
   align-items: center;
   justify-content: center;
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: rgba(19,20,26,0.9);
+  border: 1px solid var(--accent);
   border-radius: 50%;
-  color: var(--ink-dim);
-  font-size: 16px;
+  color: var(--accent);
+  font-size: 22px;
   cursor: pointer;
+  box-shadow: 0 0 10px rgba(51,255,102,0.4);
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
 }
-#btn-flip:active { color: var(--accent); border-color: var(--accent); }
+#btn-flip:active { background: rgba(51,255,102,0.15); }
