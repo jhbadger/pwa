@@ -79,7 +79,10 @@
 
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
+    // updateViaCache: 'none' stops the browser from trusting GitHub Pages'
+    // 10-minute HTTP cache header for sw.js itself, so update checks always
+    // hit the network and new deploys are picked up without a manual clear.
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
   }
 </script>
 </body>

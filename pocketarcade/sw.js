@@ -1,4 +1,5 @@
-const CACHE = 'pocket-arcade-v7';
+const CACHE = 'pocket-arcade-v8';
+const CACHE_PREFIX = 'pocket-arcade-';
 
 const PRECACHE = [
   './',
@@ -19,15 +20,17 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
+  // Cache Storage is shared across the whole origin, and this origin hosts
+  // several unrelated apps — only ever touch caches with our own prefix.
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k.startsWith(CACHE_PREFIX) && k !== CACHE).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+    caches.match(e.request, { cacheName: CACHE }).then(r => r || fetch(e.request))
   );
 });
