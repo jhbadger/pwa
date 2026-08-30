@@ -182,3 +182,26 @@ header h1 {
 @media (min-width: 900px) and (hover: hover) {
   #controls { display: none; }
 }
+
+/* ── Landscape hold ──
+   The game is natively portrait. On a touchscreen held sideways, rotate the
+   whole page 90deg so it fills the (now wider) screen instead of rendering
+   small in the middle. Scoped to coarse/no-hover pointers so desktop browser
+   windows — which are almost always wider than tall — are never rotated. */
+@media screen and (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  html {
+    width: 100vh;
+    height: 100vw;
+    overflow: hidden;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    transform-origin: left top;
+    transform: rotate(-90deg);
+  }
+  html.landscape-flip {
+    top: 0;
+    left: 100%;
+    transform: rotate(90deg);
+  }
+}

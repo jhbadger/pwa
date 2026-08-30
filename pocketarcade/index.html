@@ -23,6 +23,24 @@
       || window.navigator.standalone === true;
     document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
   })();
+  (function () {
+    // Picks which way to rotate the page for the landscape-hold CSS (see
+    // style.css) so it comes out right-side-up regardless of which edge of
+    // the phone the user rotated up.
+    function updateLandscapeFlip() {
+      var flip = false;
+      if (screen.orientation && screen.orientation.type) {
+        flip = screen.orientation.type === 'landscape-secondary';
+      } else if (typeof window.orientation === 'number') {
+        flip = window.orientation === -90;
+      }
+      document.documentElement.classList.toggle('landscape-flip', flip);
+    }
+    window.addEventListener('orientationchange', updateLandscapeFlip);
+    window.addEventListener('resize', updateLandscapeFlip);
+    if (screen.orientation) screen.orientation.addEventListener('change', updateLandscapeFlip);
+    updateLandscapeFlip();
+  })();
 </script>
 </head>
 <body>
@@ -55,7 +73,8 @@
   <button id="btn-play">INSERT COIN</button>
   <div class="help-text">
     Arrow keys: move &nbsp;&bull;&nbsp; Space: fire<br>
-    C: insert coin &nbsp;&bull;&nbsp; Enter: 1P Start
+    C: insert coin &nbsp;&bull;&nbsp; Enter: 1P Start<br>
+    Gamepad: D-pad/stick move &nbsp;&bull;&nbsp; A: fire &nbsp;&bull;&nbsp; Start: coin + begin
   </div>
   <div id="error-msg"></div>
 </div>
