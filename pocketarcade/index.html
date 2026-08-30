@@ -24,12 +24,14 @@
     document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
   })();
   (function () {
-    // Which way the landscape-hold CSS (see style.css) should rotate the page
-    // varies by device/browser and the orientation APIs report it
-    // inconsistently, so rather than guess, remember whichever way this
-    // device's user last picked with the on-screen flip button.
-    var KEY = 'pa-landscape-flip';
-    document.documentElement.classList.toggle('landscape-flip', localStorage.getItem(KEY) === '1');
+    // Landscape-hold rotation (see style.css) is an explicit opt-in the user
+    // controls with the header button, not auto-detected — orientation/hover/
+    // pointer media features are unreliable across devices, and gating
+    // visibility of the control itself behind the same landscape media query
+    // meant there was no way to reach it if that query ever failed to match.
+    var state = localStorage.getItem('pa-rotate-state') || 'off';
+    document.documentElement.classList.toggle('landscape-mode', state !== 'off');
+    document.documentElement.classList.toggle('landscape-flip', state === 'flip');
   })();
 </script>
 </head>
@@ -37,9 +39,8 @@
 
 <header>
   <h1>Space Invaders</h1>
+  <button id="btn-rotate" aria-label="Toggle landscape rotation">&#8635;</button>
 </header>
-
-<button id="btn-flip" aria-label="Flip screen orientation">&#8635;</button>
 
 <div id="screen-wrap">
   <canvas id="screen"></canvas>
@@ -66,7 +67,8 @@
   <div class="help-text">
     Arrow keys: move &nbsp;&bull;&nbsp; Space: fire<br>
     C: insert coin &nbsp;&bull;&nbsp; Enter: 1P Start<br>
-    Gamepad: D-pad/stick move &nbsp;&bull;&nbsp; A: fire &nbsp;&bull;&nbsp; Start: coin + begin
+    Gamepad: D-pad/stick move &nbsp;&bull;&nbsp; A: fire &nbsp;&bull;&nbsp; Start: coin + begin<br>
+    Holding your phone sideways? Tap &#8635; next to the title to rotate the screen to fit.
   </div>
   <div id="error-msg"></div>
 </div>

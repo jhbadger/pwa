@@ -34,6 +34,7 @@ body {
 }
 
 header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,6 +47,31 @@ header h1 {
   letter-spacing: 4px;
   color: var(--accent);
   text-transform: uppercase;
+}
+
+#btn-rotate {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--ink-dim);
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+#btn-rotate:active,
+html.landscape-mode #btn-rotate {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 #screen-wrap {
@@ -184,12 +210,14 @@ header h1 {
 }
 
 /* ── Landscape hold ──
-   The game is natively portrait. On a touchscreen held sideways, rotate the
-   whole page 90deg so it fills the (now wider) screen instead of rendering
-   small in the middle. Scoped to coarse/no-hover pointers so desktop browser
-   windows — which are almost always wider than tall — are never rotated. */
-@media screen and (orientation: landscape) and (hover: none) and (pointer: coarse) {
-  html {
+   The game is natively portrait. On a touchscreen held sideways, the header's
+   rotate button (an explicit user choice, not auto-detected — see main.js)
+   rotates the whole page 90deg so it fills the (now wider) screen instead of
+   rendering small in the middle. Gated only on the .landscape-mode class the
+   button sets, not on hover/pointer/orientation heuristics, so the control
+   that turns it on or off is never itself hidden by the condition it toggles. */
+@media screen and (orientation: landscape) {
+  html.landscape-mode {
     width: 100vh;
     height: 100vw;
     overflow: hidden;
@@ -199,37 +227,9 @@ header h1 {
     transform-origin: left top;
     transform: rotate(-90deg);
   }
-  html.landscape-flip {
+  html.landscape-mode.landscape-flip {
     top: 0;
     left: 100%;
     transform: rotate(90deg);
   }
-
-  /* Manual override: which physical direction is "right" varies by device,
-     so let the player flip it and remember their pick (see main.js). */
-  #btn-flip {
-    display: flex;
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    width: 44px;
-    height: 44px;
-    z-index: 200;
-  }
 }
-
-#btn-flip {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(19,20,26,0.9);
-  border: 1px solid var(--accent);
-  border-radius: 50%;
-  color: var(--accent);
-  font-size: 22px;
-  cursor: pointer;
-  box-shadow: 0 0 10px rgba(51,255,102,0.4);
-  -webkit-tap-highlight-color: transparent;
-  touch-action: none;
-}
-#btn-flip:active { background: rgba(51,255,102,0.15); }

@@ -124,12 +124,24 @@ function pollGamepad() {
   }
 }
 
-// ── Landscape Flip Button ───────────────────────────────────────────────────
+// ── Landscape Rotate Button ─────────────────────────────────────────────────
+// Cycles: off -> rotated -> rotated (other direction) -> off. Always visible
+// in the header, in both orientations, so it's reachable even if a previous
+// pick left the display rotated the wrong way.
 
-document.getElementById('btn-flip').addEventListener('click', () => {
-  const flip = !document.documentElement.classList.contains('landscape-flip');
-  document.documentElement.classList.toggle('landscape-flip', flip);
-  localStorage.setItem('pa-landscape-flip', flip ? '1' : '0');
+const ROTATE_STATES = ['off', 'on', 'flip'];
+
+function applyRotateState(state) {
+  const root = document.documentElement;
+  root.classList.toggle('landscape-mode', state !== 'off');
+  root.classList.toggle('landscape-flip', state === 'flip');
+  localStorage.setItem('pa-rotate-state', state);
+}
+
+document.getElementById('btn-rotate').addEventListener('click', () => {
+  const current = localStorage.getItem('pa-rotate-state') || 'off';
+  const next = ROTATE_STATES[(ROTATE_STATES.indexOf(current) + 1) % ROTATE_STATES.length];
+  applyRotateState(next);
 });
 
 // ── Start Button ────────────────────────────────────────────────────────────
