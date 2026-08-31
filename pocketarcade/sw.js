@@ -1,4 +1,4 @@
-const CACHE = 'pocket-arcade-v9';
+const CACHE = 'pocket-arcade-v10';
 const CACHE_PREFIX = 'pocket-arcade-';
 
 const PRECACHE = [

@@ -146,6 +146,19 @@ html.landscape-mode #btn-rotate {
   line-height: 1.8;
 }
 
+.other-game {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--ink-dim);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--border);
+  padding-bottom: 2px;
+}
+.other-game:hover, .other-game:active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 #error-msg {
   display: none;
   color: var(--accent2);
