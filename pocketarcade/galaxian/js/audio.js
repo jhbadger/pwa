@@ -3,21 +3,21 @@
 // Galaxian sound synthesis via Web Audio API.
 // Real hardware drives this from discrete 555-timer/noise circuitry, not
 // samples or a simple bit-triggered synth like the Space Invaders boards.
-// This approximates the three audible pieces of that circuit:
-//  - a continuous "marching aliens" background hum, gated on by any of the
-//    FS1/FS2/FS3 channels and pitch-stepped by the 4-bit LFO DAC value
+// This approximates three audible pieces of that circuit:
+//  - the dive-bomb/fanfare siren, driven by the pitch_w byte: the ROM writes
+//    0xFF as an idle sentinel almost every frame and only deviates from it
+//    while an actual siren sweep (start jingle, enemy dive) is in progress,
+//    so 0xFF-vs-not is what gates this tone on and off
 //  - a one-shot laser zap on FIRE
 //  - a one-shot noise burst on HIT (covers both enemy kills and player death,
 //    same as the real board's single noise gate)
-// The dive-bomb siren (driven by continuous pitch_w writes) isn't sonified —
-// distinguishing "siren active" from "routine per-frame service write" isn't
-// derivable from the discrete circuit's memory-mapped interface alone.
+// The FS1/FS2/FS3-gated background hum and the 4-bit LFO DAC value that
+// would pitch it aren't sonified — no synth approximation of that circuit
+// sounded like the source material, so it's left silent.
 class GalaxianAudio {
   constructor() {
     this.ctx = null;
-    this.bgNode = null;
-    this.bgGate = 0; // bitmask of which FS channels are currently on
-    this.lfoVal = 0;
+    this.pitchNode = null;
   }
 
   init() {
@@ -30,47 +30,53 @@ class GalaxianAudio {
     if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
   }
 
-  bgFreq() {
-    // 16 discrete steps mapped across a couple of octaves in the bass range,
-    // echoing the classic 4-note descending march pattern.
-    return 80 + this.lfoVal * 9;
+  pitchFreq(val) {
+    // Empirically, higher pitch_w values correspond to higher pitch: the
+    // start-of-wave fanfare counts up through it (rising tone) and enemy
+    // dives count down through it (falling "swoop").
+    return 200 + (val / 255) * 1200;
   }
 
-  setLfo(val) {
-    this.lfoVal = val;
-    if (this.bgNode) this.bgNode.osc.frequency.setTargetAtTime(this.bgFreq(), this.ctx.currentTime, 0.02);
-  }
-
-  trigger(ch, on) {
+  setPitch(val) {
     if (!this.ctx) return;
-    if (ch <= 2) { // FS1/FS2/FS3 — background hum gate
-      const bit = 1 << ch;
-      this.bgGate = on ? (this.bgGate | bit) : (this.bgGate & ~bit);
-      if (this.bgGate && !this.bgNode) this.startBg();
-      else if (!this.bgGate && this.bgNode) this.stopBg();
-    } else if (ch === 3 && on) {
-      this.hit();
-    } else if (ch === 5 && on) {
-      this.fire();
+    if (val === 0xFF) {
+      this.stopPitch();
+      return;
     }
+    const freq = this.pitchFreq(val);
+    if (!this.pitchNode) this.startPitch(freq);
+    else this.pitchNode.osc.frequency.setTargetAtTime(freq, this.ctx.currentTime, 0.003);
   }
 
-  startBg() {
+  startPitch(freq) {
     const ctx = this.ctx, now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'square';
-    osc.frequency.setValueAtTime(this.bgFreq(), now);
-    gain.gain.setValueAtTime(0.18, now);
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.15, now + 0.005);
     osc.connect(gain); gain.connect(ctx.destination);
     osc.start(now);
-    this.bgNode = { osc, gain };
+    this.pitchNode = { osc, gain };
   }
 
-  stopBg() {
-    if (!this.bgNode) return;
-    try { this.bgNode.osc.stop(); } catch (e) {}
-    this.bgNode = null;
+  stopPitch() {
+    if (!this.pitchNode) return;
+    const { osc, gain } = this.pitchNode;
+    const now = this.ctx.currentTime;
+    gain.gain.setTargetAtTime(0, now, 0.01);
+    try { osc.stop(now + 0.05); } catch (e) {}
+    this.pitchNode = null;
+  }
+
+  trigger(ch, on) {
+    if (!this.ctx) return;
+    if (ch === 3 && on) {
+      this.hit();
+    } else if (ch === 5 && on) {
+      this.fire();
+    }
   }
 
   fire() {

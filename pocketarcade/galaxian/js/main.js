@@ -27,7 +27,7 @@ function start() {
   audio.init();
   audio.resume();
   machine.onSound = (ch, on) => audio.trigger(ch, on);
-  machine.onLfoChange = (val) => audio.setLfo(val);
+  machine.onPitchChange = (val) => audio.setPitch(val);
   machine.loadRoms();
   machine.reset();
   running = true;

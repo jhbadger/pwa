@@ -62,10 +62,11 @@ class Galaxian {
 
     this.lfoVal = 0;      // 4-bit background pitch DAC value (0x6004-0x6007)
     this.soundBits = 0;   // sound_w latch (0x6800-0x6807), bit-per-channel
-    this.pitchVal = 0;    // 0x7800 write: dive-siren pitch (not sonified, see audio notes)
+    this.pitchVal = 0xFF; // 0x7800 write: dive-siren pitch, 0xFF = idle sentinel
 
-    this.onSound = null;     // function(channel, on) — same edge-triggered convention as the other machines
-    this.onLfoChange = null; // function(value 0-15) — background pitch DAC changed
+    this.onSound = null;      // function(channel, on) — same edge-triggered convention as the other machines
+    this.onLfoChange = null;  // function(value 0-15) — background pitch DAC changed
+    this.onPitchChange = null; // function(value 0-255) — dive-siren pitch changed, 0xFF = idle
 
     this.cyclesPerFrame = 50688; // (384*3 * 264) / 6, see derivation in project notes
     this.cycleDebt = 0;
@@ -169,7 +170,12 @@ class Galaxian {
       else if (sub === 7) this.flipScreenY = !!(val & 1);
       return;
     }
-    this.pitchVal = val; // 0x7800-0x7FFF: pitch_w
+    // 0x7800-0x7FFF: pitch_w — written most frames even when idle, so only
+    // forward actual changes (mirrors setLfoBit's change-gating below).
+    if (val !== this.pitchVal) {
+      this.pitchVal = val;
+      if (this.onPitchChange) this.onPitchChange(val);
+    }
   }
 
   setLfoBit(bit, on) {
@@ -209,6 +215,7 @@ class Galaxian {
     this.flipScreenY = false;
     this.lfoVal = 0;
     this.soundBits = 0;
+    this.pitchVal = 0xFF;
     this.cycleDebt = 0;
     this.frameNum = 0;
     this.starOrigin = 0;
