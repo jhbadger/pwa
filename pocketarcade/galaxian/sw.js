@@ -1,13 +1,16 @@
-const CACHE = 'pocket-arcade-v12';
-const CACHE_PREFIX = 'pocket-arcade-';
+const CACHE = 'galaxian-v1';
+const CACHE_PREFIX = 'galaxian-';
 
-// The root is now just the game-select menu — Space Invaders itself lives
-// at invaders/ (its own scoped app/cache, like partii/ and galaxian/).
 const PRECACHE = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './css/style.css',
+  '../css/style.css',
+  './js/roms.js',
+  './js/z80.js',
+  './js/machine.js',
+  './js/audio.js',
+  './js/main.js',
 ];
 
 self.addEventListener('install', e => {
@@ -18,9 +21,8 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   // Cache Storage is shared across the whole origin, and this origin hosts
-  // several unrelated apps — only ever touch caches with our own prefix.
-  // (This also cleans up the old pocket-arcade-v* caches from before Space
-  // Invaders moved out to invaders/.)
+  // several unrelated apps (including the two other Space Invaders apps
+  // elsewhere in this project) — only ever touch caches with our own prefix.
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k.startsWith(CACHE_PREFIX) && k !== CACHE).map(k => caches.delete(k)))

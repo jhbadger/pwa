@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-<title>Space Invaders Part II</title>
-<meta name="description" content="Classic 1980s arcade games — Space Invaders Part II.">
+<title>Space Invaders</title>
+<meta name="description" content="Classic 1980s arcade games — Space Invaders.">
 <meta name="theme-color" content="#0a0a0f">
 
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="../icons/icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-title" content="Space Invaders Part II">
+<meta name="apple-mobile-web-app-title" content="Space Invaders">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
@@ -29,7 +29,7 @@
     // pointer media features are unreliable across devices, and gating
     // visibility of the control itself behind the same landscape media query
     // meant there was no way to reach it if that query ever failed to match.
-    var state = localStorage.getItem('pa-rotate-state-partii') || 'off';
+    var state = localStorage.getItem('pa-rotate-state') || 'off';
     document.documentElement.classList.toggle('landscape-mode', state !== 'off');
     document.documentElement.classList.toggle('landscape-flip', state === 'flip');
   })();
@@ -38,7 +38,7 @@
 <body>
 
 <header>
-  <h1>Space Invaders Part II</h1>
+  <h1>Space Invaders</h1>
   <button id="btn-rotate" aria-label="Toggle landscape rotation">&#8635;</button>
 </header>
 
@@ -62,7 +62,7 @@
 
 <div id="overlay">
   <div class="logo-text">POCKET ARCADE</div>
-  <div class="sub-text">Space Invaders Part II &middot; 1979</div>
+  <div class="sub-text">Space Invaders &middot; 1978</div>
   <button id="btn-play">INSERT COIN</button>
   <div class="help-text">
     Arrow keys: move &nbsp;&bull;&nbsp; Space: fire<br>
@@ -72,7 +72,7 @@
   </div>
   <div class="other-games">
     <a class="other-game" href="../">&#8962; Menu</a>
-    <a class="other-game" href="../invaders/">&#8592; Space Invaders</a>
+    <a class="other-game" href="../partii/">&#8594; Space Invaders Part II</a>
     <a class="other-game" href="../galaxian/">&#8594; Galaxian</a>
   </div>
   <div id="error-msg"></div>

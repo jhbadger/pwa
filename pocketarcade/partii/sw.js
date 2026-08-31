@@ -1,4 +1,4 @@
-const CACHE = 'si-partii-v1';
+const CACHE = 'si-partii-v3';
 const CACHE_PREFIX = 'si-partii-';
 
 const PRECACHE = [
@@ -7,9 +7,9 @@ const PRECACHE = [
   './manifest.webmanifest',
   '../css/style.css',
   './js/roms.js',
-  '../js/i8080.js',
+  './js/i8080.js',
   './js/machine.js',
-  '../js/audio.js',
+  './js/audio.js',
   './js/main.js',
 ];
 
@@ -21,8 +21,8 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   // Cache Storage is shared across the whole origin, and this origin hosts
-  // several unrelated apps (including the original Space Invaders app one
-  // directory up) — only ever touch caches with our own prefix.
+  // several unrelated apps (the menu at the root plus the other two games)
+  // — only ever touch caches with our own prefix.
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k.startsWith(CACHE_PREFIX) && k !== CACHE).map(k => caches.delete(k)))

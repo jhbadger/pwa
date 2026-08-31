@@ -1,7 +1,7 @@
 {
   "name": "Pocket Arcade",
   "short_name": "Pocket Arcade",
-  "description": "Classic 1980s arcade games — Space Invaders and more.",
+  "description": "Classic 1980s arcade games — Space Invaders, Space Invaders Part II, and Galaxian.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <title>Pocket Arcade</title>
-<meta name="description" content="Classic 1980s arcade games — Space Invaders and more.">
+<meta name="description" content="Classic 1980s arcade games — Space Invaders, Space Invaders Part II, and Galaxian.">
 <meta name="theme-color" content="#0a0a0f">
 
 <link rel="manifest" href="manifest.webmanifest">
@@ -23,62 +23,44 @@
       || window.navigator.standalone === true;
     document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
   })();
-  (function () {
-    // Landscape-hold rotation (see style.css) is an explicit opt-in the user
-    // controls with the header button, not auto-detected — orientation/hover/
-    // pointer media features are unreliable across devices, and gating
-    // visibility of the control itself behind the same landscape media query
-    // meant there was no way to reach it if that query ever failed to match.
-    var state = localStorage.getItem('pa-rotate-state') || 'off';
-    document.documentElement.classList.toggle('landscape-mode', state !== 'off');
-    document.documentElement.classList.toggle('landscape-flip', state === 'flip');
-  })();
 </script>
 </head>
-<body>
+<body class="menu-body">
 
 <header>
-  <h1>Space Invaders</h1>
-  <button id="btn-rotate" aria-label="Toggle landscape rotation">&#8635;</button>
+  <h1>Pocket Arcade</h1>
 </header>
 
-<div id="screen-wrap">
-  <canvas id="screen"></canvas>
-</div>
+<main id="menu">
+  <div class="logo-text menu-logo">POCKET ARCADE</div>
+  <div class="sub-text menu-sub">Choose a game</div>
 
-<div id="controls">
-  <div class="ctrl-group">
-    <button class="ctrl-btn btn-small" id="btn-coin">COIN</button>
-    <button class="ctrl-btn btn-small" id="btn-start">1P</button>
-  </div>
-  <div class="ctrl-group">
-    <button class="ctrl-btn btn-arrow" id="btn-left">&#9664;</button>
-    <button class="ctrl-btn btn-arrow" id="btn-right">&#9654;</button>
-  </div>
-  <div class="ctrl-group">
-    <button class="ctrl-btn btn-action" id="btn-fire">FIRE</button>
-  </div>
-</div>
+  <div class="game-grid">
+    <a class="game-card" href="invaders/">
+      <svg class="game-icon" viewBox="0 0 11 8" style="color:#33ff66" aria-hidden="true">
+        <path fill="currentColor" d="M2 0h1v1h-1zM8 0h1v1h-1zM3 1h1v1h-1zM7 1h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM1 3h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM5 3h1v1h-1zM6 3h1v1h-1zM8 3h1v1h-1zM9 3h1v1h-1zM0 4h1v1h-1zM1 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM7 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM0 5h1v1h-1zM2 5h1v1h-1zM3 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM7 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM0 6h1v1h-1zM2 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM3 7h1v1h-1zM4 7h1v1h-1zM6 7h1v1h-1zM7 7h1v1h-1z"/>
+      </svg>
+      <span class="game-title">Space Invaders</span>
+      <span class="game-year">1978</span>
+    </a>
 
-<div id="overlay">
-  <div class="logo-text">POCKET ARCADE</div>
-  <div class="sub-text">Space Invaders &middot; 1978</div>
-  <button id="btn-play">INSERT COIN</button>
-  <div class="help-text">
-    Arrow keys: move &nbsp;&bull;&nbsp; Space: fire<br>
-    C: insert coin &nbsp;&bull;&nbsp; Enter: 1P Start<br>
-    Gamepad: D-pad/stick move &nbsp;&bull;&nbsp; A: fire &nbsp;&bull;&nbsp; Start: coin + begin<br>
-    Holding your phone sideways? Tap &#8635; next to the title to rotate the screen to fit.
-  </div>
-  <a class="other-game" href="partii/">&#8594; Play Space Invaders Part II</a>
-  <div id="error-msg"></div>
-</div>
+    <a class="game-card" href="partii/">
+      <svg class="game-icon" viewBox="0 0 8 8" style="color:#ff5555" aria-hidden="true">
+        <path fill="currentColor" d="M3 0h1v1h-1zM4 0h1v1h-1zM2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM5 1h1v1h-1zM1 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM1 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM7 3h1v1h-1zM0 4h1v1h-1zM1 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM7 4h1v1h-1zM2 5h1v1h-1zM5 5h1v1h-1zM1 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM6 6h1v1h-1zM0 7h1v1h-1zM2 7h1v1h-1zM5 7h1v1h-1zM7 7h1v1h-1z"/>
+      </svg>
+      <span class="game-title">Space Invaders<br>Part II</span>
+      <span class="game-year">1979</span>
+    </a>
 
-<script src="js/roms.js"></script>
-<script src="js/i8080.js"></script>
-<script src="js/machine.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/main.js"></script>
+    <a class="game-card" href="galaxian/">
+      <svg class="game-icon" viewBox="0 0 9 8" style="color:#55ccff" aria-hidden="true">
+        <path fill="currentColor" d="M4 0h1v1h-1zM4 1h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM5 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM6 5h1v1h-1zM7 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM4 6h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1zM0 7h1v1h-1zM4 7h1v1h-1zM8 7h1v1h-1z"/>
+      </svg>
+      <span class="game-title">Galaxian</span>
+      <span class="game-year">1979</span>
+    </a>
+  </div>
+</main>
 
 <script>
   if ('serviceWorker' in navigator) {
