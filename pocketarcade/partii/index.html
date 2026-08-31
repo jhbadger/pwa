@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Space Invaders Part II</title>
+<meta name="description" content="Classic 1980s arcade games — Space Invaders Part II.">
+<meta name="theme-color" content="#0a0a0f">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../icons/icon-512.png" sizes="512x512" type="image/png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Space Invaders Part II">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="../css/style.css">
+
+<script>
+  (function () {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+    document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
+  })();
+  (function () {
+    // Landscape-hold rotation (see style.css) is an explicit opt-in the user
+    // controls with the header button, not auto-detected — orientation/hover/
+    // pointer media features are unreliable across devices, and gating
+    // visibility of the control itself behind the same landscape media query
+    // meant there was no way to reach it if that query ever failed to match.
+    var state = localStorage.getItem('pa-rotate-state-partii') || 'off';
+    document.documentElement.classList.toggle('landscape-mode', state !== 'off');
+    document.documentElement.classList.toggle('landscape-flip', state === 'flip');
+  })();
+</script>
+</head>
+<body>
+
+<header>
+  <h1>Space Invaders Part II</h1>
+  <button id="btn-rotate" aria-label="Toggle landscape rotation">&#8635;</button>
+</header>
+
+<div id="screen-wrap">
+  <canvas id="screen"></canvas>
+</div>
+
+<div id="controls">
+  <div class="ctrl-group">
+    <button class="ctrl-btn btn-small" id="btn-coin">COIN</button>
+    <button class="ctrl-btn btn-small" id="btn-start">1P</button>
+  </div>
+  <div class="ctrl-group">
+    <button class="ctrl-btn btn-arrow" id="btn-left">&#9664;</button>
+    <button class="ctrl-btn btn-arrow" id="btn-right">&#9654;</button>
+  </div>
+  <div class="ctrl-group">
+    <button class="ctrl-btn btn-action" id="btn-fire">FIRE</button>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="logo-text">POCKET ARCADE</div>
+  <div class="sub-text">Space Invaders Part II &middot; 1979</div>
+  <button id="btn-play">INSERT COIN</button>
+  <div class="help-text">
+    Arrow keys: move &nbsp;&bull;&nbsp; Space: fire<br>
+    C: insert coin &nbsp;&bull;&nbsp; Enter: 1P Start<br>
+    Gamepad: D-pad/stick move &nbsp;&bull;&nbsp; A: fire &nbsp;&bull;&nbsp; Start: coin + begin<br>
+    Holding your phone sideways? Tap &#8635; next to the title to rotate the screen to fit.
+  </div>
+  <div id="error-msg"></div>
+</div>
+
+<script src="js/roms.js"></script>
+<script src="../js/i8080.js"></script>
+<script src="js/machine.js"></script>
+<script src="../js/audio.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    // updateViaCache: 'none' stops the browser from trusting GitHub Pages'
+    // 10-minute HTTP cache header for sw.js itself, so update checks always
+    // hit the network and new deploys are picked up without a manual clear.
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+  }
+</script>
+</body>
+</html>
