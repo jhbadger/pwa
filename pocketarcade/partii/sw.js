@@ -1,4 +1,4 @@
-const CACHE = 'si-partii-v4';
+const CACHE = 'si-partii-v6';
 const CACHE_PREFIX = 'si-partii-';
 
 const PRECACHE = [

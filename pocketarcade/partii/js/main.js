@@ -21,6 +21,7 @@ function loop(ts) {
   machine.runFrame();
   machine.render(imgData);
   ctx.putImageData(imgData, 0, 0);
+  updateHighScore();
 }
 
 function start() {
@@ -32,6 +33,51 @@ function start() {
   machine.reset();
   running = true;
   frameId = requestAnimationFrame(loop);
+}
+
+// ── High Score Persistence ──────────────────────────────────────────────────
+// The game keeps its current high score as 2 raw BCD bytes at 0x20F4 in work
+// RAM (the same address MAME's hiscore.dat targets for this ROM set). Boot
+// code can briefly reuse that RAM as scratch before settling on the real
+// power-on default, so poking our saved value in too early just gets
+// overwritten — wait for a run of identical reads (the same "wait, then
+// poke" trick MAME's hiscore plugin uses) before trusting it, then switch to
+// mirroring any later change straight back out.
+const HISCORE_KEY = 'pa-hiscore-partii';
+const HISCORE_ADDR = 0x20F4, HISCORE_LEN = 2;
+const HISCORE_STABLE_FRAMES = 10;   // ~166ms of unchanged reads before we trust the boot value
+const HISCORE_TIMEOUT_FRAMES = 600; // ~10s fallback if it never settles
+let hiscoreLoaded = false, hiscoreFrames = 0, hiscoreStable = 0, hiscorePrevKey = null, lastHiscoreKey = null;
+
+function updateHighScore() {
+  const mem = machine.cpu.mem;
+  const bytes = [];
+  for (let i = 0; i < HISCORE_LEN; i++) bytes.push(mem[HISCORE_ADDR + i]);
+  const key = bytes.join(',');
+
+  if (!hiscoreLoaded) {
+    hiscoreFrames++;
+    if (key === hiscorePrevKey) hiscoreStable++;
+    else { hiscoreStable = 0; hiscorePrevKey = key; }
+    if (hiscoreStable < HISCORE_STABLE_FRAMES && hiscoreFrames < HISCORE_TIMEOUT_FRAMES) return;
+    hiscoreLoaded = true;
+    let saved;
+    try { saved = localStorage.getItem(HISCORE_KEY); } catch { saved = null; }
+    if (saved) {
+      const savedBytes = saved.split(',').map(Number);
+      if (savedBytes.length === HISCORE_LEN && savedBytes.every(b => Number.isInteger(b) && b >= 0 && b <= 255)) {
+        for (let i = 0; i < HISCORE_LEN; i++) mem[HISCORE_ADDR + i] = savedBytes[i];
+        lastHiscoreKey = saved;
+        return;
+      }
+    }
+    lastHiscoreKey = key; // nothing saved yet — the game's own boot default is the baseline
+    return;
+  }
+
+  if (key === lastHiscoreKey) return;
+  lastHiscoreKey = key;
+  try { localStorage.setItem(HISCORE_KEY, key); } catch {}
 }
 
 function showError(msg) {

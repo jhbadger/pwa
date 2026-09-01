@@ -1,4 +1,4 @@
-const CACHE = 'si-invaders-v2';
+const CACHE = 'si-invaders-v4';
 const CACHE_PREFIX = 'si-invaders-';
 
 const PRECACHE = [

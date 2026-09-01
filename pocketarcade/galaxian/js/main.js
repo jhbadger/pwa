@@ -20,6 +20,7 @@ function loop(ts) {
   machine.runFrame();
   machine.render(imgData);
   ctx.putImageData(imgData, 0, 0);
+  updateHighScore();
 }
 
 function start() {
@@ -32,6 +33,60 @@ function start() {
   machine.reset();
   running = true;
   frameId = requestAnimationFrame(loop);
+}
+
+// ── High Score Persistence ──────────────────────────────────────────────────
+// The game keeps its current high score (HI_SCORE, per the public Galaxian
+// disassembly) as 3 packed-BCD bytes at 0x40A8 in work RAM — the same
+// address MAME's hiscore.dat targets for this ROM set. Boot runs two RAM
+// sweeps before settling: a self-test countdown that happens to pass through
+// this address, then — a beat later, at the same value (0) — the game's own
+// "reset all scores to 0" call for real. The two are indistinguishable by
+// value alone, so a short stability check gets fooled by the first sweep and
+// pokes our save in during the gap, only for the second sweep to immediately
+// clobber it. Wait out a fixed floor long enough to clear both sweeps (timed
+// empirically) before ever trusting a read, then require a run of identical
+// reads on top of that — the same "wait, then poke" trick MAME's hiscore
+// plugin uses — before switching to mirroring any later change straight
+// back out. Work RAM is mirrored every 0x400 bytes, so 0x40A8 lives at index
+// 0xA8 in machine.ram.
+const HISCORE_KEY = 'pa-hiscore-galaxian';
+const HISCORE_ADDR = 0x40A8 & 0x3FF, HISCORE_LEN = 3;
+const HISCORE_MIN_FRAMES = 150;     // ~2.5s floor, past both boot sweeps (~70 frames) with margin
+const HISCORE_STABLE_FRAMES = 10;   // ~166ms of unchanged reads before we trust the boot value
+const HISCORE_TIMEOUT_FRAMES = 600; // ~10s fallback if it never settles
+let hiscoreLoaded = false, hiscoreFrames = 0, hiscoreStable = 0, hiscorePrevKey = null, lastHiscoreKey = null;
+
+function updateHighScore() {
+  const mem = machine.ram;
+  const bytes = [];
+  for (let i = 0; i < HISCORE_LEN; i++) bytes.push(mem[HISCORE_ADDR + i]);
+  const key = bytes.join(',');
+
+  if (!hiscoreLoaded) {
+    hiscoreFrames++;
+    if (key === hiscorePrevKey) hiscoreStable++;
+    else { hiscoreStable = 0; hiscorePrevKey = key; }
+    const settled = hiscoreFrames >= HISCORE_MIN_FRAMES && hiscoreStable >= HISCORE_STABLE_FRAMES;
+    if (!settled && hiscoreFrames < HISCORE_TIMEOUT_FRAMES) return;
+    hiscoreLoaded = true;
+    let saved;
+    try { saved = localStorage.getItem(HISCORE_KEY); } catch { saved = null; }
+    if (saved) {
+      const savedBytes = saved.split(',').map(Number);
+      if (savedBytes.length === HISCORE_LEN && savedBytes.every(b => Number.isInteger(b) && b >= 0 && b <= 255)) {
+        for (let i = 0; i < HISCORE_LEN; i++) mem[HISCORE_ADDR + i] = savedBytes[i];
+        lastHiscoreKey = saved;
+        return;
+      }
+    }
+    lastHiscoreKey = key; // nothing saved yet — the game's own boot default is the baseline
+    return;
+  }
+
+  if (key === lastHiscoreKey) return;
+  lastHiscoreKey = key;
+  try { localStorage.setItem(HISCORE_KEY, key); } catch {}
 }
 
 function showError(msg) {

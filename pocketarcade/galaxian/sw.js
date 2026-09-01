@@ -1,4 +1,4 @@
-const CACHE = 'galaxian-v2';
+const CACHE = 'galaxian-v4';
 const CACHE_PREFIX = 'galaxian-';
 
 const PRECACHE = [
