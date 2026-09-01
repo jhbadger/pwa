@@ -81,11 +81,56 @@ function setupButton(id, port, bit) {
   el.addEventListener('mouseleave', up);
 }
 
-setupButton('btn-left',  0, 2);
-setupButton('btn-right', 0, 3);
-setupButton('btn-fire',  0, 4);
 setupButton('btn-coin',  0, 0);
 setupButton('btn-start', 1, 0);
+
+// Move/fire happen on the screen itself: drag past a deadzone to steer
+// (direction follows which side of the starting point the finger is on, so
+// you can reverse without lifting); a touch that never leaves the deadzone
+// fires instead, for as long as it's held.
+function setupGesture(el, setLeft, setRight, setFire) {
+  const DEADZONE = 12;
+  let activeId = null, anchorX = 0, dragging = false;
+
+  el.addEventListener('pointerdown', e => {
+    if (activeId !== null) return;
+    activeId = e.pointerId;
+    anchorX = e.clientX;
+    dragging = false;
+    el.setPointerCapture(activeId);
+    audio.resume();
+    setFire(true);
+  });
+
+  el.addEventListener('pointermove', e => {
+    if (e.pointerId !== activeId) return;
+    const dx = e.clientX - anchorX;
+    if (!dragging) {
+      if (Math.abs(dx) < DEADZONE) return;
+      dragging = true;
+      setFire(false);
+    }
+    setLeft(dx < 0);
+    setRight(dx > 0);
+  });
+
+  function release(e) {
+    if (e.pointerId !== activeId) return;
+    activeId = null;
+    setLeft(false);
+    setRight(false);
+    setFire(false);
+  }
+  el.addEventListener('pointerup', release);
+  el.addEventListener('pointercancel', release);
+}
+
+setupGesture(
+  document.getElementById('screen-wrap'),
+  v => machine.setIn0(2, v),
+  v => machine.setIn0(3, v),
+  v => machine.setIn0(4, v)
+);
 
 // ── Gamepad Input ────────────────────────────────────────────────────────────
 
