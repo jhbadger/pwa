@@ -1,4 +1,4 @@
-const CACHE = 'pocket-arcade-v12';
+const CACHE = 'pocket-arcade-v13';
 const CACHE_PREFIX = 'pocket-arcade-';
 
 // The root is now just the game-select menu — Space Invaders itself lives
