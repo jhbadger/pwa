@@ -94,7 +94,7 @@ setupButton('btn-start', 1, 2);
 // ── Gamepad Input ────────────────────────────────────────────────────────────
 
 // Standard gamepad mapping: D-pad/left stick to move, button 0 (A/X) to fire,
-// start button to insert coin and begin the game (also dismisses the overlay).
+// start button to insert coin and begin the game.
 const padState = { left: false, right: false, fire: false, start: false, coin: false };
 const AXIS_THRESHOLD = 0.5;
 
@@ -120,7 +120,6 @@ function pollGamepad() {
   if (startBtn !== padState.start) {
     machine.setPort1(2, startBtn);
     padState.start = startBtn;
-    if (startBtn && !running) start();
   }
 }
 
@@ -144,9 +143,11 @@ document.getElementById('btn-rotate').addEventListener('click', () => {
   applyRotateState(next);
 });
 
-// ── Start Button ────────────────────────────────────────────────────────────
+// ── Start ────────────────────────────────────────────────────────────────
+// Skip the insert-coin ritual: the arcade menu already committed the player
+// to this game, so boot straight into it instead of gating on a tap.
 
-document.getElementById('btn-play').addEventListener('click', start);
+start();
 
 // Scale canvas to fill available space while keeping aspect ratio
 function resize() {

@@ -49,9 +49,8 @@ header h1 {
   text-transform: uppercase;
 }
 
-#btn-rotate {
+#btn-rotate, #btn-menu {
   position: absolute;
-  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   width: 28px;
@@ -67,9 +66,16 @@ header h1 {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
+  text-decoration: none;
 }
+#btn-rotate { right: 8px; }
+#btn-menu { left: 8px; }
 #btn-rotate:active,
 html.landscape-mode #btn-rotate {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+#btn-menu:active {
   color: var(--accent);
   border-color: var(--accent);
 }
@@ -91,12 +97,12 @@ html.landscape-mode #btn-rotate {
   background: #000;
 }
 
-/* ── Overlay ── */
+/* ── Overlay (error state only — games boot straight in, no insert-coin screen) ── */
 #overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.92);
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -119,51 +125,6 @@ html.landscape-mode #btn-rotate {
   letter-spacing: 3px;
   color: var(--ink-dim);
   text-transform: uppercase;
-}
-
-#btn-play {
-  background: transparent;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  font-family: inherit;
-  font-size: 13px;
-  letter-spacing: 4px;
-  padding: 12px 32px;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-#btn-play:hover, #btn-play:active {
-  background: rgba(51,255,102,0.1);
-  box-shadow: 0 0 12px rgba(51,255,102,0.3);
-}
-
-.help-text {
-  font-size: 10px;
-  color: var(--ink-dim);
-  text-align: center;
-  letter-spacing: 1px;
-  line-height: 1.8;
-}
-
-.other-games {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.other-game {
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: var(--ink-dim);
-  text-decoration: none;
-  border-bottom: 1px dotted var(--border);
-  padding-bottom: 2px;
-}
-.other-game:hover, .other-game:active {
-  color: var(--accent);
-  border-color: var(--accent);
 }
 
 #error-msg {
