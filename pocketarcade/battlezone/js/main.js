@@ -61,13 +61,13 @@ function showError(msg) {
 // matching the cabinet's two independent forward/back levers.
 const keyMap = {
   'c': 'coin1',
-  'Enter': 'start1',
+  'enter': 'start1',
   '2': 'start2',
   ' ': 'fire',
-  'w': 'leftUp', 'W': 'leftUp',
-  's': 'leftDown', 'S': 'leftDown',
-  'ArrowUp': 'rightUp',
-  'ArrowDown': 'rightDown',
+  'w': 'leftUp',
+  's': 'leftDown',
+  'arrowup': 'rightUp',
+  'arrowdown': 'rightDown',
 };
 
 function setControl(name, on) {
@@ -83,13 +83,16 @@ function setControl(name, on) {
   }
 }
 
+// Lowercased so Caps Lock / Shift (e.g. Shift+C, or "C" while caps-locked)
+// still hits the same binding as plain 'c' — e.key reflects the actual
+// shifted character, so 'c' and 'C' are otherwise distinct keys.
 document.addEventListener('keydown', e => {
   audio.resume();
-  const m = keyMap[e.key];
+  const m = keyMap[e.key.toLowerCase()];
   if (m) { setControl(m, true); e.preventDefault(); }
 });
 document.addEventListener('keyup', e => {
-  const m = keyMap[e.key];
+  const m = keyMap[e.key.toLowerCase()];
   if (m) setControl(m, false);
 });
 
