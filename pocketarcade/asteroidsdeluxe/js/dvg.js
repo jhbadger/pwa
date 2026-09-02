@@ -49,6 +49,13 @@ class DVG {
   }
 
   drawTo(x, y, intensity, out) {
+    // Hardware never buffers a point outside the valid 0-1023 window (bit 10
+    // set means the counter over/underflowed) — it just drops it, leaving
+    // the pen at the last valid point. Skipping this check was drawing lines
+    // to the wrapped-around raw coordinate instead, which for a mostly
+    // horizontal/vertical vector lands far off to one side and streaks a
+    // spurious line across the screen whenever an object crosses an edge.
+    if ((x | y) & 0x400) return;
     if (intensity > 0) out.push(this.penX, this.penY, x, y, intensity);
     this.penX = x; this.penY = y;
   }
