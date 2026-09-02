@@ -330,6 +330,91 @@ body {
 .measure h2 { margin: 0.6em 0 0.8em; font-size: 1.08rem; }
 .measure .title-page h1 { font-size: 1.7rem; margin-bottom: 0.6em; }
 
+/* ---------- table of contents overlay ---------- */
+
+.toc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.toc-overlay.hidden { display: none; }
+
+.toc-panel {
+  background: var(--wood);
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 2px solid var(--accent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.toc-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: var(--safe-top) var(--safe-right) 8px var(--safe-left);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.toc-title {
+  flex: 1;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.toc-close {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.toc-close:active { background: rgba(255, 255, 255, 0.1); }
+.toc-close svg { width: 20px; height: 20px; fill: currentColor; }
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 calc(var(--safe-bottom) + 4px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.toc-item {
+  padding: 11px var(--safe-right) 11px calc(var(--safe-left) + 8px);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.toc-item:active { background: rgba(255, 255, 255, 0.07); }
+
+.toc-item--h1 {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+}
+
+.toc-item--h2 {
+  padding-left: calc(var(--safe-left) + 22px);
+}
+
 /* ---------- toast (update banner etc.) ---------- */
 
 .toast {

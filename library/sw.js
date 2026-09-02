@@ -4,7 +4,7 @@
 // the precached files' contents; run `node scripts/build.mjs` after editing
 // any of them (including content/*.json) so the browser detects a real update.
 
-const VERSION = 'adacd1f6e784';
+const VERSION = '0a30df34e1d7';
 const CACHE_NAME = `library-${VERSION}`;
 
 // Everything the app needs to launch and read every bundled book, cold, with

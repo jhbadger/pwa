@@ -87,7 +87,7 @@ function findPageForMarker(pages, marker) {
   return idx;
 }
 
-export function createReader({ pageEl, leafEl, underEl, measureEl, onPageChange }) {
+export function createReader({ pageEl, leafEl, underEl, measureEl, onPageChange, onTocRequest }) {
   let pages = [];
   let currentIndex = 0;
   let bookId = null;
@@ -207,7 +207,7 @@ export function createReader({ pageEl, leafEl, underEl, measureEl, onPageChange 
     const rect = pageEl.getBoundingClientRect();
     const forward = (e.clientX - rect.left) > rect.width / 2;
     if (!beginFlip(forward)) return;
-    drag = { forward, startX: e.clientX, startTime: Date.now(), width: rect.width };
+    drag = { forward, startX: e.clientX, startY: e.clientY, startTime: Date.now(), width: rect.width };
     try { pageEl.setPointerCapture(e.pointerId); } catch { /* ignore */ }
   });
 
@@ -220,7 +220,17 @@ export function createReader({ pageEl, leafEl, underEl, measureEl, onPageChange 
   function endDrag(e) {
     if (!drag) return;
     const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
     const isTap = Math.abs(dx) < 10 && (Date.now() - drag.startTime) < 300;
+    if (isTap && Math.abs(dy) < 10 && e.type !== 'pointercancel' && onTocRequest) {
+      const rect = pageEl.getBoundingClientRect();
+      if (drag.startY - rect.top < rect.height / 4) {
+        showPage(currentIndex);
+        onTocRequest();
+        drag = null;
+        return;
+      }
+    }
     const threshold = drag.width * 0.3;
     const completed = isTap ? true : (drag.forward ? dx < -threshold : dx > threshold);
     finishFlip(drag.forward, completed);
@@ -230,6 +240,21 @@ export function createReader({ pageEl, leafEl, underEl, measureEl, onPageChange 
   pageEl.addEventListener('pointerup', endDrag);
   pageEl.addEventListener('pointercancel', endDrag);
 
+  function getToc() {
+    return contentBlocks
+      .map((b, i) => ({ tag: b.tag, html: b.html, blockIndex: i }))
+      .filter(b => b.tag === 'h1' || b.tag === 'h2')
+      .map(b => ({
+        tag: b.tag,
+        label: b.html.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(),
+        blockIndex: b.blockIndex,
+      }));
+  }
+
+  function navigateToBlock(blockIndex) {
+    showPage(findPageForMarker(pages, { blockIndex, wordOffset: 0 }));
+  }
+
   return {
     loadBook,
     repaginate,
@@ -237,5 +262,7 @@ export function createReader({ pageEl, leafEl, underEl, measureEl, onPageChange 
     prevPage: () => { if (beginFlip(false)) finishFlip(false, true); },
     get currentIndex() { return currentIndex; },
     get pageCount() { return pages.length; },
+    getToc,
+    navigateToBlock,
   };
 }

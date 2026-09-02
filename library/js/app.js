@@ -9,6 +9,9 @@ const readerBookTitle = document.getElementById('readerBookTitle');
 const readerChapter = document.getElementById('readerChapter');
 const pageIndicator = document.getElementById('pageIndicator');
 const toastEl = document.getElementById('toast');
+const tocOverlay = document.getElementById('tocOverlay');
+const tocList = document.getElementById('tocList');
+const tocClose = document.getElementById('tocClose');
 
 // ---------- bookcase ----------
 
@@ -36,6 +39,31 @@ shelfEl.addEventListener('click', (e) => {
 
 const bookCache = new Map();
 
+function showToc() {
+  const entries = reader.getToc();
+  tocList.innerHTML = '';
+  for (const entry of entries) {
+    const li = document.createElement('li');
+    li.className = `toc-item toc-item--${entry.tag}`;
+    li.textContent = entry.label;
+    li.addEventListener('click', () => {
+      hideToc();
+      reader.navigateToBlock(entry.blockIndex);
+    });
+    tocList.appendChild(li);
+  }
+  tocOverlay.classList.remove('hidden');
+}
+
+function hideToc() {
+  tocOverlay.classList.add('hidden');
+}
+
+tocClose.addEventListener('click', hideToc);
+tocOverlay.addEventListener('click', (e) => {
+  if (!e.target.closest('.toc-panel')) hideToc();
+});
+
 const reader = createReader({
   pageEl: document.getElementById('page'),
   leafEl: document.getElementById('pageLeaf'),
@@ -45,6 +73,7 @@ const reader = createReader({
     readerChapter.textContent = chapterLabel;
     pageIndicator.textContent = count > 0 ? `Page ${index + 1} of ${count}` : '';
   },
+  onTocRequest: showToc,
 });
 
 async function fetchBookContent(id) {
@@ -85,7 +114,7 @@ window.addEventListener('resize', () => {
 // blocking real clicks on buttons or the page-flip gesture area (which needs
 // its own pointerdown/up handling in reader.js, unaffected by this).
 document.addEventListener('touchstart', (e) => {
-  if (e.target.closest('button, #toast')) return;
+  if (e.target.closest('button, #toast, #tocOverlay')) return;
   e.preventDefault();
 }, { passive: false });
 
