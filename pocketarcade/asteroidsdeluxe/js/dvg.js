@@ -49,13 +49,16 @@ class DVG {
   }
 
   drawTo(x, y, intensity, out) {
-    // Hardware never buffers a point outside the valid 0-1023 window (bit 10
-    // set means the counter over/underflowed) — it just drops it, leaving
-    // the pen at the last valid point. Skipping this check was drawing lines
-    // to the wrapped-around raw coordinate instead, which for a mostly
-    // horizontal/vertical vector lands far off to one side and streaks a
-    // spurious line across the screen whenever an object crosses an edge.
-    if ((x | y) & 0x400) return;
+    // Hardware never buffers a point outside the valid 0-1023 window — it
+    // just drops it, leaving the pen at the last valid point. Real hardware
+    // steps the beam one unit at a time, so it only ever overshoots the
+    // window by a hair and a "bit 10 set" test is enough to catch it; our
+    // closed-form VCTR can jump the position by a large amount in one go,
+    // which can land back inside the low bits' "looks valid" pattern while
+    // still being wildly out of range (e.g. 2992, which has bit 10 clear).
+    // A direct range check catches both cases and avoids drawing a
+    // spurious line across the screen to the wrapped-around coordinate.
+    if (x > 1023 || y > 1023) return;
     if (intensity > 0) out.push(this.penX, this.penY, x, y, intensity);
     this.penX = x; this.penY = y;
   }
