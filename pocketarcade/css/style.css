@@ -181,6 +181,14 @@ html.landscape-mode #btn-rotate {
 }
 
 .btn-small  { width: 44px; height: 36px; font-size: 9px; }
+.btn-med    { width: 58px; height: 46px; font-size: 9px; }
+
+.ctrl-rows {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
 
 @keyframes flicker {
   0%, 95%, 100% { opacity: 1; }
