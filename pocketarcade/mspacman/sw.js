@@ -1,4 +1,4 @@
-const CACHE = 'mspacman-v1';
+const CACHE = 'mspacman-v2';
 const CACHE_PREFIX = 'mspacman-';
 
 const PRECACHE = [

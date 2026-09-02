@@ -11,24 +11,38 @@
 // — an independent reimplementation of that publicly documented hardware
 // (including its anti-piracy scheme), not a code port.
 
-function millmanVoltage(activeResistances, pulldown) {
-  let conductance = 1 / pulldown;
-  let current = 0;
-  for (const r of activeResistances) { conductance += 1 / r; current += 1 / r; }
-  return current / conductance;
+// Faithful port of MAME's compute_resistor_weights() for the specific case
+// this board's palette PROM circuit uses: no separate pulldown/pullup
+// resistor on any channel (each bit's own resistor doubles as the "other
+// bits'" pulldown when it's off), and — critically — all channels passed
+// in the same call share ONE autoscale factor, taken from whichever
+// channel has the largest theoretical max. Blue only has two resistors
+// here (red/green have three), so it never reaches full 0-255 brightness;
+// normalizing each channel independently (as if each had its own 0-255
+// range) desaturates/shifts colors — e.g. the frightened-ghost blue
+// reading as green — since blue ends up disproportionately amplified.
+function computeResistorWeights(maxval, channelResistances) {
+  const raw = channelResistances.map(resistances => {
+    const n = resistances.length;
+    const w = new Array(n);
+    for (let i = 0; i < n; i++) {
+      const r1 = resistances[i]; // this bit's own resistor (pulled toward Vcc when the bit is set)
+      let r0cond = 0;
+      for (let j = 0; j < n; j++) if (j !== i) r0cond += 1 / resistances[j]; // all other bits, grounded
+      const r0 = 1 / r0cond;
+      w[i] = maxval * r0 / (r0 + r1);
+    }
+    return w;
+  });
+  const maxOut = Math.max(...raw.map(w => w.reduce((a, b) => a + b, 0)));
+  const scale = maxval / maxOut;
+  return raw.map(w => w.map(x => x * scale));
 }
 
-function buildResistorTable(resistances, pulldown) {
-  const n = resistances.length;
-  const maxVolt = millmanVoltage(resistances, pulldown);
-  const table = [];
-  for (let v = 0; v < (1 << n); v++) {
-    const active = [];
-    for (let b = 0; b < n; b++) if (v & (1 << b)) active.push(resistances[b]);
-    const volt = active.length ? millmanVoltage(active, pulldown) : 0;
-    table.push(Math.round(255 * volt / maxVolt));
-  }
-  return table;
+function combineWeights(weights, bits) {
+  let sum = 0;
+  for (let i = 0; i < weights.length; i++) if (bits[i]) sum += weights[i];
+  return Math.round(sum);
 }
 
 const TILE_XOFF = [64, 65, 66, 67, 0, 1, 2, 3];
@@ -39,11 +53,19 @@ const SPR_YOFF = [0, 8, 16, 24, 32, 40, 48, 56, 256, 264, 272, 280, 288, 296, 30
 function getBit(data, base, bitIndex) {
   return (data[base + (bitIndex >> 3)] >> (7 - (bitIndex & 7))) & 1;
 }
+// MAME's gfx_element::decode() starts planebit at 1<<(planes-1) and shifts
+// right per plane, so the FIRST listed plane (offset+0) contributes the
+// HIGH bit of the pen and the second (offset+4) the low bit — backwards
+// from the naive "plane index == pen bit index" assumption. Getting this
+// backwards doesn't scramble shapes (nonzero-vs-zero is unaffected) but
+// silently sends specific pen values to the wrong color-table slot, e.g.
+// dots landing on black instead of white, or frightened ghosts reading
+// green instead of blue.
 function decodeTile(data, base, out) {
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       const bi0 = TILE_YOFF[row] + TILE_XOFF[col];
-      out[row * 8 + col] = getBit(data, base, bi0) | (getBit(data, base, bi0 + 4) << 1);
+      out[row * 8 + col] = getBit(data, base, bi0 + 4) | (getBit(data, base, bi0) << 1);
     }
   }
 }
@@ -51,7 +73,7 @@ function decodeSprite(data, base, out) {
   for (let row = 0; row < 16; row++) {
     for (let col = 0; col < 16; col++) {
       const bi0 = SPR_YOFF[row] + SPR_XOFF[col];
-      out[row * 16 + col] = getBit(data, base, bi0) | (getBit(data, base, bi0 + 4) << 1);
+      out[row * 16 + col] = getBit(data, base, bi0 + 4) | (getBit(data, base, bi0) << 1);
     }
   }
 }
@@ -179,12 +201,15 @@ class MsPacman {
   buildPalette() {
     const promPalette = decode_palette_7f();
     const promColorTable = decode_colortable_4a();
-    const rTable = buildResistorTable([1000, 470, 220], 470);
-    const bTable = buildResistorTable([470, 220], 470);
+    const [rw, gw, bw] = computeResistorWeights(255, [[1000, 470, 220], [1000, 470, 220], [470, 220]]);
     this.palette = [];
     for (let i = 0; i < 32; i++) {
       const byte = promPalette[i];
-      this.palette.push([rTable[byte & 7], rTable[(byte >> 3) & 7], bTable[(byte >> 6) & 3]]);
+      this.palette.push([
+        combineWeights(rw, [byte & 1, (byte >> 1) & 1, (byte >> 2) & 1]),
+        combineWeights(gw, [(byte >> 3) & 1, (byte >> 4) & 1, (byte >> 5) & 1]),
+        combineWeights(bw, [(byte >> 6) & 1, (byte >> 7) & 1]),
+      ]);
     }
     this.colorTable = new Uint8Array(256);
     for (let i = 0; i < 256; i++) this.colorTable[i] = promColorTable[i] & 0x0F;
