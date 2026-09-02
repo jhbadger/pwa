@@ -151,11 +151,16 @@ class Pacman {
   }
 
   reset() {
-    this.videoram.fill(0);
-    this.colorram.fill(0);
-    this.ram.fill(0);
-    this.spriteram.fill(0);
-    this.spriteram2.fill(0);
+    // Real SRAM powers up with unpredictable garbage, not zeroed — filling
+    // with 0 here (JS's array default) makes boot RAM start out coincidentally
+    // matching the game's own "just cleared this" state before its actual
+    // init code ever runs, which defeats anything (like high-score restore)
+    // that waits to see that state genuinely happen.
+    this.videoram.fill(0xFF);
+    this.colorram.fill(0xFF);
+    this.ram.fill(0xFF);
+    this.spriteram.fill(0xFF);
+    this.spriteram2.fill(0xFF);
     this.z80.reset();
     this.mainlatch = 0;
     this.irqMask = false;

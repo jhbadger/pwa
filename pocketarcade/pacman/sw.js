@@ -1,4 +1,4 @@
-const CACHE = 'pacman-v3';
+const CACHE = 'pacman-v4';
 const CACHE_PREFIX = 'pacman-';
 
 const PRECACHE = [

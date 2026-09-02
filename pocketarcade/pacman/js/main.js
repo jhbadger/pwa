@@ -60,54 +60,92 @@ function start() {
 // ── High Score Persistence ──────────────────────────────────────────────────
 // Two RAM regions make up the attract-mode high score (a packed value plus
 // the on-screen digit tiles), per MAME's community hiscore database — real
-// Pac-Man hardware has no non-volatile storage of its own. Boot code can
-// briefly reuse this RAM as scratch, so wait for a run of identical reads
-// before trusting it, then mirror any later change back out.
+// Pac-Man hardware has no non-volatile storage of its own.
+//
+// This follows MAME's own hiscore.lua fairly closely (it's the reference
+// implementation for this exact address data): rather than just waiting for
+// reads to go quiet, it waits for each region's first/last byte to match an
+// exact expected "just cleared this" signature — 0x00/0x00 for the packed
+// score, 0x40/0x40 for the on-screen digit tiles — before trusting the RAM
+// enough to overwrite it. Boot runs a RAM self-test that scribbles an
+// unrelated counter pattern through this same memory for several hundred
+// frames first, so the signature is required to hold for a run of frames,
+// not just match once (self-test bytes can pass through 0x00/0x40 in
+// passing). Change detection once loaded sums only the packed-score region
+// (mirroring hiscore.lua's own checksum) and debounces saves, so a
+// transient reuse of the digit-tile bytes for something else doesn't
+// trigger a spurious write.
 const HISCORE_KEY = 'pa-hiscore-pacman';
-const HISCORE_REGIONS = [[0x4E88, 4], [0x43ED, 6]];
-const HISCORE_STABLE_FRAMES = 10;
-const HISCORE_TIMEOUT_FRAMES = 600;
-let hiscoreLoaded = false, hiscoreFrames = 0, hiscoreStable = 0, hiscorePrevKey = null, lastHiscoreKey = null;
+const HISCORE_REGIONS = [
+  { addr: 0x4E88, len: 4, cStart: 0x00, cEnd: 0x00 },
+  { addr: 0x43ED, len: 6, cStart: 0x40, cEnd: 0x40 },
+];
+const HISCORE_STABLE_FRAMES = 10;   // consecutive frames the signature must hold
+const HISCORE_TIMEOUT_FRAMES = 1800; // ~30s fallback (real settle is ~250 frames)
+const HISCORE_SAVE_DEBOUNCE_FRAMES = 300; // ~5s between saves, matching hiscore.lua's grace period
 
+let hiscoreLoaded = false, hiscoreBootFrames = 0, hiscoreMatchStreak = 0;
+let hiscoreDefaultChecksum = 0, hiscoreCurrentChecksum = 0, hiscoreLastSaveFrame = -Infinity;
+let hiscoreFrameCounter = 0;
+
+function hiscoreSignatureMatches() {
+  for (const r of HISCORE_REGIONS) {
+    if (machine.read(r.addr) !== r.cStart) return false;
+    if (machine.read(r.addr + r.len - 1) !== r.cEnd) return false;
+  }
+  return true;
+}
 function readHiscoreBytes() {
   const bytes = [];
-  for (const [addr, len] of HISCORE_REGIONS) {
-    for (let i = 0; i < len; i++) bytes.push(machine.read(addr + i));
-  }
+  for (const r of HISCORE_REGIONS) for (let i = 0; i < r.len; i++) bytes.push(machine.read(r.addr + i));
   return bytes;
+}
+// Only the packed-score region — the digit-tile region can be transiently
+// reused for unrelated on-screen text, so it's saved but not used to detect
+// "did the score actually change".
+function hiscoreChecksum() {
+  const r = HISCORE_REGIONS[0];
+  let sum = 0;
+  for (let i = 0; i < r.len; i++) sum += machine.read(r.addr + i);
+  return sum;
 }
 
 function updateHighScore() {
-  const bytes = readHiscoreBytes();
-  const key = bytes.join(',');
+  hiscoreFrameCounter++;
 
   if (!hiscoreLoaded) {
-    hiscoreFrames++;
-    if (key === hiscorePrevKey) hiscoreStable++;
-    else { hiscoreStable = 0; hiscorePrevKey = key; }
-    if (hiscoreStable < HISCORE_STABLE_FRAMES && hiscoreFrames < HISCORE_TIMEOUT_FRAMES) return;
+    hiscoreBootFrames++;
+    hiscoreMatchStreak = hiscoreSignatureMatches() ? hiscoreMatchStreak + 1 : 0;
+    const signatureSettled = hiscoreMatchStreak >= HISCORE_STABLE_FRAMES;
+    if (!signatureSettled && hiscoreBootFrames < HISCORE_TIMEOUT_FRAMES) return;
+
     hiscoreLoaded = true;
-    let saved;
-    try { saved = localStorage.getItem(HISCORE_KEY); } catch { saved = null; }
-    if (saved) {
-      const savedBytes = saved.split(',').map(Number);
-      const totalLen = HISCORE_REGIONS.reduce((n, r) => n + r[1], 0);
-      if (savedBytes.length === totalLen && savedBytes.every(b => Number.isInteger(b) && b >= 0 && b <= 255)) {
-        let i = 0;
-        for (const [addr, len] of HISCORE_REGIONS) {
-          for (let j = 0; j < len; j++) machine.write(addr + j, savedBytes[i++]);
+    // Capture the boot-default checksum BEFORE restoring, matching
+    // hiscore.lua's own ordering — this is what lets later code tell "score
+    // legitimately reset to its boot default" apart from "no change yet".
+    hiscoreDefaultChecksum = hiscoreChecksum();
+    if (signatureSettled) {
+      let saved;
+      try { saved = localStorage.getItem(HISCORE_KEY); } catch { saved = null; }
+      if (saved) {
+        const savedBytes = saved.split(',').map(Number);
+        const totalLen = HISCORE_REGIONS.reduce((n, r) => n + r.len, 0);
+        if (savedBytes.length === totalLen && savedBytes.every(b => Number.isInteger(b) && b >= 0 && b <= 255)) {
+          let k = 0;
+          for (const r of HISCORE_REGIONS) for (let i = 0; i < r.len; i++) machine.write(r.addr + i, savedBytes[k++]);
         }
-        lastHiscoreKey = saved;
-        return;
       }
     }
-    lastHiscoreKey = key;
+    hiscoreCurrentChecksum = hiscoreChecksum();
     return;
   }
 
-  if (key === lastHiscoreKey) return;
-  lastHiscoreKey = key;
-  try { localStorage.setItem(HISCORE_KEY, key); } catch {}
+  const checksum = hiscoreChecksum();
+  if (checksum === hiscoreCurrentChecksum || checksum === hiscoreDefaultChecksum) return;
+  if (hiscoreFrameCounter - hiscoreLastSaveFrame < HISCORE_SAVE_DEBOUNCE_FRAMES) return;
+  hiscoreCurrentChecksum = checksum;
+  hiscoreLastSaveFrame = hiscoreFrameCounter;
+  try { localStorage.setItem(HISCORE_KEY, readHiscoreBytes().join(',')); } catch {}
 }
 
 function showError(msg) {
