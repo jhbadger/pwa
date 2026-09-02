@@ -1,4 +1,4 @@
-const CACHE = 'asteroidsdeluxe-v3';
+const CACHE = 'asteroidsdeluxe-v4';
 const CACHE_PREFIX = 'asteroidsdeluxe-';
 
 const PRECACHE = [

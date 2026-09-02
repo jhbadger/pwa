@@ -74,7 +74,15 @@ class DVG {
     else this.pc = this.dvy;
     return 0;
   }
-  // VCTR: draw a scaled vector to a new relative position
+  // VCTR: draw a scaled vector to a new relative position. The beam moves
+  // via two cascaded 7497 bit-rate multipliers (one per axis): over `fin`
+  // clock pulses, each axis fires floor-ish pulse counts spaced as evenly
+  // as the classic bit-reversal DDA algorithm allows — NOT simply
+  // fin*rate/4096 (tried that as a closed form; it disagrees with the real
+  // pulse schedule on the large majority of fin/rate pairs, since the
+  // pulse *timing* within the window matters, not just the total count).
+  // So this steps the same way hardware does. Worst case (fin=1024) is
+  // ~12k cheap iterations — trivial for one instruction, one frame.
   h2(out) {
     let scale;
     if (this.op === 0xF) {
@@ -87,17 +95,45 @@ class DVG {
     } else {
       scale = (this.scale + this.op) & 0xF;
     }
-    const fin = 0xFFF - (((2 << scale) & 0x7FF) ^ 0xFFF);
-    const dxSign = (this.dvx & 0x400) ? -1 : 1;
-    const dySign = (this.dvy & 0x400) ? -1 : 1;
+    let fin = 0xFFF - (((2 << scale) & 0x7FF) ^ 0xFFF);
+    const cycles = 8 * fin;
+    const dx = (this.dvx & 0x400) ? -1 : 1;
+    const dy = (this.dvy & 0x400) ? -1 : 1;
     const mx = (this.dvx << 2) & 0xFFF;
     const my = (this.dvy << 2) & 0xFFF;
-    const dxTotal = dxSign * Math.floor((fin * mx) / 4096);
-    const dyTotal = dySign * Math.floor((fin * my) / 4096);
-    this.xpos = (this.xpos + dxTotal) & 0xFFF;
-    this.ypos = (this.ypos + dyTotal) & 0xFFF;
+    let c = 0;
+    while (fin--) {
+      let countx = 0, county = 0;
+      for (let bit = 0; bit < 12; bit++) {
+        if ((c & ((1 << (bit + 1)) - 1)) === ((1 << bit) - 1)) {
+          if (mx & (1 << (11 - bit))) countx = 1;
+          if (my & (1 << (11 - bit))) county = 1;
+        }
+      }
+      c = (c + 1) & 0xFFF;
+
+      // As soon as either axis crosses the valid/invalid boundary, finish
+      // the vector up to that edge (or resume from it) instead of jumping
+      // straight through — matching real hardware's beam-blanking.
+      if (countx) {
+        if (!(this.ypos & 0x400) && ((this.xpos ^ (this.xpos + dx)) & 0x400)) {
+          if ((this.xpos + dx) & 0x400) this.drawTo(this.xpos, this.ypos, this.intensity, out);
+          else this.drawTo((this.xpos + dx) & 0xFFF, this.ypos, 0, out);
+        }
+        this.xpos = (this.xpos + dx) & 0xFFF;
+      }
+      if (county) {
+        if (!(this.xpos & 0x400) && ((this.ypos ^ (this.ypos + dy)) & 0x400)) {
+          if (!(this.xpos & 0x400)) {
+            if ((this.ypos + dy) & 0x400) this.drawTo(this.xpos, this.ypos, this.intensity, out);
+            else this.drawTo(this.xpos, (this.ypos + dy) & 0xFFF, 0, out);
+          }
+        }
+        this.ypos = (this.ypos + dy) & 0xFFF;
+      }
+    }
     this.drawTo(this.xpos, this.ypos, this.intensity, out);
-    return 8 * fin;
+    return cycles;
   }
   // HALT / absolute reposition (LABS-style), selected by opcode bit 0
   h3(out) {

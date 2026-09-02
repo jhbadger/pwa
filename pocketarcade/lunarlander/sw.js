@@ -1,4 +1,4 @@
-const CACHE = 'lunarlander-v1';
+const CACHE = 'lunarlander-v2';
 const CACHE_PREFIX = 'lunarlander-';
 
 const PRECACHE = [
