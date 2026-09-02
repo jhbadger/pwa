@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Ms. Pac-Man</title>
+<meta name="description" content="Classic 1980s arcade games — Ms. Pac-Man.">
+<meta name="theme-color" content="#0a0a0f">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../icons/icon-512.png" sizes="512x512" type="image/png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Ms. Pac-Man">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="../css/style.css">
+
+<script>
+  (function () {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+    document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
+  })();
+  (function () {
+    var state = localStorage.getItem('pa-rotate-state-mspacman') || 'off';
+    document.documentElement.classList.toggle('landscape-mode', state !== 'off');
+    document.documentElement.classList.toggle('landscape-flip', state === 'flip');
+  })();
+</script>
+</head>
+<body>
+
+<header>
+  <a id="btn-menu" href="../" aria-label="Back to arcade menu">&#8962;</a>
+  <h1>Ms. Pac-Man</h1>
+  <button id="btn-rotate" aria-label="Toggle landscape rotation">&#8635;</button>
+</header>
+
+<div id="screen-wrap">
+  <canvas id="screen"></canvas>
+</div>
+
+<div id="controls">
+  <div class="ctrl-group">
+    <button class="ctrl-btn btn-small" id="btn-coin">COIN</button>
+    <button class="ctrl-btn btn-small" id="btn-start">1P</button>
+  </div>
+  <div class="gesture-hint">Swipe to move</div>
+</div>
+
+<div id="overlay">
+  <div class="logo-text">POCKET ARCADE</div>
+  <div class="sub-text">Ms. Pac-Man &middot; 1981</div>
+  <div id="error-msg"></div>
+</div>
+
+<script src="js/roms.js"></script>
+<script src="js/z80.js"></script>
+<script src="js/machine.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+  }
+</script>
+</body>
+</html>
