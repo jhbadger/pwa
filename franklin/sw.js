@@ -1,4 +1,4 @@
-const CACHE = 'franklin-ace-v5';
+const CACHE = 'franklin-ace-v6';
 const CACHE_PREFIX = 'franklin-ace-';
 
 const PRECACHE = [
