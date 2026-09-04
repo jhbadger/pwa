@@ -20,9 +20,13 @@ const TRANS62 = [
   0xf7, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff,
 ];
 
-// Standard DOS 3.3 logical<->physical sector skew table (the same table DOS's
-// own boot1 embeds at the end of Track 0 Sector 0).
-const DOS_SKEW = [0, 13, 11, 9, 7, 5, 3, 1, 14, 12, 10, 8, 6, 4, 2, 15];
+// Standard DOS 3.3 sector skew, in the direction a nibblizer needs it: given a
+// physical sector's position around the track, which logical (DOS-order)
+// sector's data lives there. This is the inverse of the logical->physical
+// table DOS's own boot1 embeds at the end of Track 0 Sector 0 -- both are
+// permutations of 0-15 that agree only on sectors 0, 5, 10 and 15, so mixing
+// them up still boots Track 0 Sector 0 but scrambles everything after it.
+const DOS_SKEW = [0, 7, 14, 6, 13, 5, 12, 4, 11, 3, 10, 2, 9, 1, 8, 15];
 
 function fourXfour(val) {
   let xx = val & 0xaa;

@@ -33,6 +33,13 @@ class Video {
     canvas.height = ROWS * this.cellH;
     this.ctx.textBaseline = 'top';
     this.ctx.font = `bold ${this.cellH - 2}px "Courier New", monospace`;
+    // A real Apple II character cell is 7x8 pixels -- almost square, and
+    // much wider relative to its height than a typical monospace font's
+    // natural glyph advance. Left as-is, fillText leaves a wide gap after
+    // every character; stretching each glyph horizontally to fill the cell
+    // gives the dense, edge-to-edge look real Apple II text has.
+    const naturalWidth = this.ctx.measureText('M').width || (this.cellH * 0.6);
+    this.glyphScaleX = this.cellW / naturalWidth;
   }
 
   render() {
@@ -76,7 +83,11 @@ class Video {
         ctx.fillStyle = inverse ? fg : bg;
         ctx.fillRect(x, y, this.cellW, this.cellH);
         ctx.fillStyle = inverse ? bg : fg;
-        ctx.fillText(String.fromCharCode(ch), x + 1, y + 1);
+        ctx.save();
+        ctx.translate(x, y + 1);
+        ctx.scale(this.glyphScaleX, 1);
+        ctx.fillText(String.fromCharCode(ch), 0, 0);
+        ctx.restore();
       }
     }
   }
