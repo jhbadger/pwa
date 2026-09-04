@@ -40,14 +40,17 @@
 <div id="controls">
   <div class="ctrl-group">
     <button class="ctrl-btn" id="btn-power">POWER ON</button>
+    <button class="ctrl-btn" id="btn-load-disk">LOAD DISK&hellip;</button>
     <button class="ctrl-btn" data-key="27">ESC</button>
     <button class="ctrl-btn" data-key="8">&#8592;</button>
     <button class="ctrl-btn" data-key="21">&#8594;</button>
     <button class="ctrl-btn" data-key="13">RETURN</button>
   </div>
 </div>
+<div id="disk-status" aria-live="polite"></div>
 
 <input id="touch-input" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
+<input id="disk-file-input" type="file" accept=".dsk,.do,.po,.gz">
 
 <script src="js/m6502.js"></script>
 <script src="js/roms.js"></script>

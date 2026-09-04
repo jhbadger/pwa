@@ -135,7 +135,18 @@ header h1 {
   color: var(--accent);
 }
 
-#touch-input {
+#disk-status {
+  min-height: 14px;
+  padding: 0 12px 4px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-align: center;
+  color: var(--ink-dim);
+  flex-shrink: 0;
+}
+#disk-status.error { color: #ff5c5c; }
+
+#touch-input, #disk-file-input {
   position: fixed;
   top: -100px;
   left: 0;
