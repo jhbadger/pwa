@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Franklin Ace 1000</title>
+<meta name="description" content="Franklin Ace 1000 emulator (Apple II+-compatible), booting its own DOS 3.3 master diskette.">
+<meta name="theme-color" content="#08150d">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-512.png" sizes="512x512" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Franklin Ace">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="css/style.css">
+
+<script>
+  (function () {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+    document.documentElement.classList.add(standalone ? 'standalone' : 'browser-tab');
+  })();
+</script>
+</head>
+<body>
+
+<header>
+  <a id="btn-menu" href="../" aria-label="Back to app menu">&#8962;</a>
+  <h1>Franklin Ace 1000</h1>
+  <button id="btn-reset" aria-label="Reset (Ctrl-Reset)">&#8635;</button>
+</header>
+
+<div id="screen-wrap">
+  <canvas id="screen"></canvas>
+</div>
+
+<div id="controls">
+  <div class="ctrl-group">
+    <button class="ctrl-btn" id="btn-power">POWER ON</button>
+    <button class="ctrl-btn" data-key="27">ESC</button>
+    <button class="ctrl-btn" data-key="8">&#8592;</button>
+    <button class="ctrl-btn" data-key="21">&#8594;</button>
+    <button class="ctrl-btn" data-key="13">RETURN</button>
+  </div>
+</div>
+
+<input id="touch-input" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
+
+<script src="js/m6502.js"></script>
+<script src="js/roms.js"></script>
+<script src="js/disk2.js"></script>
+<script src="js/machine.js"></script>
+<script src="js/video.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+  document.querySelectorAll('.ctrl-btn[data-key]').forEach(function (btn) {
+    var code = parseInt(btn.dataset.key, 10);
+    btn.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      machine.keyDown(code);
+    });
+    btn.addEventListener('pointerup', function () { machine.keyUp(); });
+  });
+</script>
+
+</body>
+</html>

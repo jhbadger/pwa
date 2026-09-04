@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="case" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a3d4a"/>
+      <stop offset="100%" stop-color="#1c1d24"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f2318"/>
+      <stop offset="100%" stop-color="#081712"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#case)"/>
+
+  <!-- monitor bezel -->
+  <rect x="96" y="112" width="320" height="248" rx="18" fill="#0a0b0f"/>
+  <rect x="114" y="130" width="284" height="212" rx="6" fill="url(#screen)"/>
+
+  <!-- phosphor prompt -->
+  <text x="138" y="300" font-family="'Courier New', monospace" font-size="72" font-weight="700" fill="#33ff66">]</text>
+  <rect x="196" y="248" width="34" height="54" fill="#33ff66">
+    <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.4;0.4;0.9;1" dur="1.6s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- base/stand -->
+  <rect x="216" y="360" width="80" height="20" rx="4" fill="#0a0b0f"/>
+  <rect x="176" y="380" width="160" height="16" rx="8" fill="#0a0b0f"/>
+
+  <!-- keyboard -->
+  <rect x="106" y="410" width="300" height="66" rx="10" fill="#2a2c36" stroke="#0a0b0f" stroke-width="3"/>
+  <g fill="#484b58">
+    <rect x="122" y="424" width="26" height="16" rx="3"/>
+    <rect x="154" y="424" width="26" height="16" rx="3"/>
+    <rect x="186" y="424" width="26" height="16" rx="3"/>
+    <rect x="218" y="424" width="26" height="16" rx="3"/>
+    <rect x="250" y="424" width="26" height="16" rx="3"/>
+    <rect x="282" y="424" width="26" height="16" rx="3"/>
+    <rect x="314" y="424" width="26" height="16" rx="3"/>
+    <rect x="346" y="424" width="26" height="16" rx="3"/>
+    <rect x="140" y="446" width="232" height="16" rx="3"/>
+  </g>
+</svg>
