@@ -45,11 +45,57 @@ window.addEventListener('keydown', (e) => {
 });
 window.addEventListener('keyup', () => machine.keyUp());
 
-// A hidden input brings up the on-screen keyboard on touch devices; its own
-// value is discarded, keystrokes are read via the same keydown path above.
+// A hidden input brings up the on-screen keyboard on touch devices. Mobile
+// software keyboards are unreliable about firing real `keydown` events with
+// usable `.key` values (many phone keyboards -- Gboard, SwiftKey, the stock
+// iOS keyboard -- only ever fire `input`), so typed characters are read from
+// the `input` event's `inputType`/`data` instead. The field is kept non-empty
+// with a sentinel character so a backspace has something to act on, and is
+// reset after every event so state never drifts.
 const touchInput = document.getElementById('touch-input');
-canvas.addEventListener('click', () => touchInput.focus());
-touchInput.addEventListener('input', () => { touchInput.value = ''; });
+const TOUCH_INPUT_SENTINEL = ' ';
+
+function resetTouchInput() {
+  touchInput.value = TOUCH_INPUT_SENTINEL;
+  touchInput.setSelectionRange(TOUCH_INPUT_SENTINEL.length, TOUCH_INPUT_SENTINEL.length);
+}
+
+resetTouchInput();
+touchInput.addEventListener('focus', resetTouchInput);
+canvas.addEventListener('click', () => {
+  resetTouchInput();
+  touchInput.focus();
+});
+
+function sendChar(code) {
+  machine.keyDown(code);
+  machine.keyUp();
+}
+
+touchInput.addEventListener('input', (e) => {
+  switch (e.inputType) {
+    case 'insertLineBreak':
+      sendChar(0x0d);
+      break;
+    case 'deleteContentBackward':
+    case 'deleteContentForward':
+      sendChar(0x08);
+      break;
+    case 'insertText':
+    case 'insertCompositionText':
+    case 'insertReplacementText': {
+      // e.data holds the inserted text on browsers that support it; older
+      // WebViews leave it null, so fall back to whatever landed after the
+      // sentinel in the field's own value.
+      const text = e.data != null ? e.data : touchInput.value.slice(TOUCH_INPUT_SENTINEL.length);
+      for (const ch of text) sendChar(ch.charCodeAt(0));
+      break;
+    }
+    default:
+      break;
+  }
+  resetTouchInput();
+});
 
 document.getElementById('btn-reset').addEventListener('click', () => machine.resetButton());
 document.getElementById('btn-power').addEventListener('click', () => {
