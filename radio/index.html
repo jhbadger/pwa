@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Internet Radio</title>
+<meta name="description" content="Browse and play internet radio stations from radio-browser.info">
+<meta name="theme-color" content="#15161c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <h1>&#128251; Internet Radio</h1>
+  <span class="header-sub">radio-browser.info</span>
+</header>
+
+<div id="now-playing-bar" class="now-playing">
+  <span class="playing-icon" id="playing-icon" aria-hidden="true"></span>
+  <span class="now-playing-name" id="now-playing-name">Not playing</span>
+  <div class="controls">
+    <label class="vol-label" title="Volume">
+      <span>&#128266;</span>
+      <input type="range" id="volume" min="0" max="100" value="80">
+    </label>
+    <button id="stop-btn" title="Stop (Ctrl+S)">&#9632; Stop</button>
+  </div>
+</div>
+
+<div class="search-section">
+  <input type="search" id="search-input" placeholder="Search stations&#x2026;" autocomplete="off" spellcheck="false">
+  <button id="search-btn">Search</button>
+</div>
+
+<div class="tab-bar">
+  <button class="tab" id="tab-favorites">&#9733; Favorites</button>
+  <button class="tab" id="tab-results">Search Results</button>
+</div>
+
+<div class="list-container" id="list-container">
+  <div class="col-headers" id="col-headers">
+    <span></span>
+    <span>Station</span>
+    <span>Codec</span>
+    <span>kbps</span>
+    <span>Country</span>
+  </div>
+  <div id="station-list" role="listbox" aria-label="Stations">
+    <div class="empty-state">Search for a station to begin.</div>
+  </div>
+</div>
+
+<div id="status" role="status" aria-live="polite"></div>
+
+<audio id="audio" preload="none"></audio>
+
+<script src="js/app.js"></script>
+</body>
+</html>
