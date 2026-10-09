@@ -31,11 +31,15 @@ class RadioApp {
     this.$tabRes    = document.getElementById('tab-results');
     this.$colHdrs   = document.getElementById('col-headers');
 
+    this.$listContainer = document.getElementById('list-container');
+
     this.audio.volume = this.$volume.value / 100;
 
     this._bind();
     this._render();
     this._updateTabs();
+
+    new ResizeObserver(() => this._checkCompact()).observe(this.$listContainer);
   }
 
   // ── Persistence ──────────────────────────────────────────────────────────
@@ -218,6 +222,18 @@ class RadioApp {
         // Re-render the current view so the star updates everywhere
         this._render();
       });
+    });
+
+    this._checkCompact();
+  }
+
+  _checkCompact() {
+    // Remove compact to measure natural widths, then re-apply if names overflow.
+    this.$listContainer.classList.remove('compact');
+    requestAnimationFrame(() => {
+      const names = this.$list.querySelectorAll('.station-name');
+      const truncated = Array.from(names).some(el => el.scrollWidth > el.clientWidth);
+      this.$listContainer.classList.toggle('compact', truncated);
     });
   }
 
