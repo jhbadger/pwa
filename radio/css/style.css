@@ -281,6 +281,19 @@ button:active { transform: scale(0.96); }
   padding-right: 8px;
 }
 
+/* Compact mode: hide detail columns when station names are truncated */
+.list-container.compact .col-headers,
+.list-container.compact .station-row {
+  grid-template-columns: 34px 1fr;
+}
+
+.list-container.compact .col-headers span:nth-child(n+3),
+.list-container.compact .station-codec,
+.list-container.compact .station-bitrate,
+.list-container.compact .station-country {
+  display: none;
+}
+
 .station-codec,
 .station-bitrate,
 .station-country {
