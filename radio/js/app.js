@@ -2,6 +2,7 @@
 
 const API = 'https://all.api.radio-browser.info/json';
 const FAV_KEY = 'radio-favorites';
+const LOAD_TIMEOUT_MS = 12000;
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -14,6 +15,8 @@ class RadioApp {
     this.favorites   = this._loadFavorites();
     this.selectedIdx = 0;
     this.playingKey  = null; // stationKey of the playing station
+    this.loadTimer   = null; // fires if a stream never starts playing
+    this.insecureSrc = false; // current stream is http:// on an https:// page
     this.activeTab   = this.favorites.length ? 'favorites' : 'results';
 
     this.audio = document.getElementById('audio');
@@ -102,7 +105,7 @@ class RadioApp {
     this.audio.addEventListener('error',   () => this._onAudioError());
     this.audio.addEventListener('playing', () => this._onAudioPlaying());
     this.audio.addEventListener('waiting', () => this.setStatus('Buffering\u2026'));
-    this.audio.addEventListener('stalled', () => this.setStatus('Stream stalled.'));
+    this.audio.addEventListener('stalled', () => this._onAudioStalled());
   }
 
   // ── Tabs ──────────────────────────────────────────────────────────────────
@@ -232,6 +235,10 @@ class RadioApp {
     const url = station.url_resolved || station.url;
     if (!url) { this.setStatus('No stream URL for this station.'); return; }
 
+    // Browsers silently upgrade http:// media on an https:// page to https://,
+    // which hangs on servers that only speak plain HTTP on that port.
+    this.insecureSrc = location.protocol === 'https:' && url.startsWith('http:');
+
     this.audio.pause();
     this.audio.src = url;
     this.audio.play().catch(() => this._onAudioError());
@@ -239,9 +246,13 @@ class RadioApp {
     this.playingKey = stationKey(station);
     this._updateNowPlaying(station.name);
     this.setStatus(`Loading: ${station.name}`);
+
+    clearTimeout(this.loadTimer);
+    this.loadTimer = setTimeout(() => this._onLoadTimeout(), LOAD_TIMEOUT_MS);
   }
 
   stop() {
+    clearTimeout(this.loadTimer);
     this.audio.pause();
     this.audio.src = '';
     this.playingKey = null;
@@ -263,6 +274,7 @@ class RadioApp {
   }
 
   _onAudioPlaying() {
+    clearTimeout(this.loadTimer);
     // Find station by playingKey across both lists
     const s = [...this.favorites, ...this.stations].find(x => stationKey(x) === this.playingKey);
     if (s) {
@@ -271,14 +283,40 @@ class RadioApp {
     }
   }
 
+  _onAudioStalled() {
+    // A stall before playback starts on an http:// stream is almost always the
+    // failed https upgrade; the load timer will report it.
+    if (this.insecureSrc && this.loadTimer) return;
+    this.setStatus('Stream stalled.');
+  }
+
+  _onLoadTimeout() {
+    this.loadTimer = null;
+    if (!this.playingKey) return;
+    this.audio.pause();
+    this.audio.src = '';
+    this._failPlayback(this.insecureSrc
+      ? 'This station only offers an http:// stream, which browsers block on secure pages. Look for an https:// version of the station.'
+      : 'Stream did not start \u2014 the station may be offline.');
+  }
+
   _onAudioError() {
+    if (!this.playingKey) return; // e.g. stop() clearing src
     const err = this.audio.error;
     let msg = 'Playback error.';
-    if (err?.code === MediaError.MEDIA_ERR_NETWORK) {
-      msg = 'Network error \u2014 stream may be HTTP-only (blocked on HTTPS) or offline.';
+    if (this.insecureSrc) {
+      msg = 'This station only offers an http:// stream, which browsers block on secure pages. Look for an https:// version of the station.';
+    } else if (err?.code === MediaError.MEDIA_ERR_NETWORK) {
+      msg = 'Network error \u2014 stream may be offline.';
     } else if (err?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
       msg = 'Stream format not supported by this browser.';
     }
+    this._failPlayback(msg);
+  }
+
+  _failPlayback(msg) {
+    clearTimeout(this.loadTimer);
+    this.loadTimer = null;
     this.setStatus(msg);
     this.playingKey = null;
     this._updateNowPlaying(null);

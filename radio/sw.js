@@ -2,7 +2,7 @@
 // for API calls and audio streams (they must always be live). Run `node scripts/build.mjs`
 // after editing precached files to bump VERSION and force a cache update.
 
-const VERSION = '8cd9c31e1856';
+const VERSION = 'd218c809c7c8';
 const CACHE = `radio-${VERSION}`;
 
 const PRECACHE = [
